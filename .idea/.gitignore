@@ -1,0 +1,42 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# ===================================================================
+# File e Directory mvn build generated
+# ===================================================================
+/target/
+/pom.xml.tag
+/pom.xml.releaseBackup
+/pom.xml.versionsBackup
+/pom.xml.next
+/release.properties
+/dependency-reduced-pom.xml
+/buildNumber.properties
+/.mvn/timing.properties
+
+*.log
+*.tmp
+
+hs_err_pid*
+
+# --- IntelliJ IDEA ---
+/.idea/
+/out/
+*.iml
+*.ipr
+*.iws
+
+# --- Windows ---
+# Thumbs.db
+# ehthumbs.db
+# Desktop.ini
+# $RECYCLE.BIN/
+
+*-local.properties
+*-local.yml
+*.zip
+*.tar
+*.gz
+*.rar
+*.sql
+*.dump
