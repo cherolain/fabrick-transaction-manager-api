@@ -1,7 +1,11 @@
-package com.fabrick.test.transaction.manager.api.dto;
+package com.fabrick.test.transaction.manager.api.dto.response;
 
+import com.fabrick.test.transaction.manager.api.dto.FabrickStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 /**
@@ -12,16 +16,19 @@ import java.util.List;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class FabrickApiResponse<T> {
 
     private FabrickStatus status;
-    private List<FabrickError> error;
+    private List<FabrickError> errors;
     private T payload;
 
     /**
      * Inner static class to represent an error object from Fabrick.
      */
     @Data
+    @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FabrickError {
         private String code;

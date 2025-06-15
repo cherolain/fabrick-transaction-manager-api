@@ -1,29 +1,22 @@
 package com.fabrick.test.transaction.manager.api.exception;
 
-import com.fabrick.test.transaction.manager.api.dto.FabrickStatus;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public class FabrickApiException extends RuntimeException {
     private final HttpStatus httpStatus;
-    private final FabrickStatus fabrickStatus;
     private final ErrorCode errorCode;
 
-
-    public FabrickApiException(String message, HttpStatus httpStatus, FabrickStatus fabrickStatus, ErrorCode errorCode) {
+    public FabrickApiException(String message, HttpStatus httpStatus, ErrorCode errorCode) {
         super(message);
         this.httpStatus = httpStatus;
-        this.fabrickStatus = fabrickStatus;
         this.errorCode = errorCode;
     }
 
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public FabrickStatus getFabrickStatus() {
-        return fabrickStatus;
-    }
-    public ErrorCode getErrorCode() {
-        return errorCode;
+    public FabrickApiException(String message, Throwable cause, HttpStatus httpStatus, ErrorCode errorCode) {
+        super(message, cause);
+        this.httpStatus = httpStatus;
+        this.errorCode = errorCode;
     }
 }
