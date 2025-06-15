@@ -1,14 +1,14 @@
 package com.fabrick.test.transaction.manager.api.service;
 
-import com.fabrick.test.transaction.manager.api.client.FabrickFeignClient;
-import com.fabrick.test.transaction.manager.api.client.dto.FabrickStatus;
-import com.fabrick.test.transaction.manager.api.client.dto.response.FabrickApiResponse;
+import com.fabrick.test.transaction.manager.api.client.GbsBankingClient;
+import com.fabrick.test.transaction.manager.api.client.dto.GbsBankingStatus;
+import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
 import com.fabrick.test.transaction.manager.api.client.dto.response.balance.Balance;
 import com.fabrick.test.transaction.manager.api.exception.ErrorCode;
-import com.fabrick.test.transaction.manager.api.exception.FabrickApiBusinessException;
-import com.fabrick.test.transaction.manager.api.exception.FabrickApiException;
+import com.fabrick.test.transaction.manager.api.exception.GbsBankingBusinessException;
+import com.fabrick.test.transaction.manager.api.exception.GbsBankingApiException;
 import com.fabrick.test.transaction.manager.api.exception.InternalApplicationException;
-import com.fabrick.test.transaction.manager.api.utils.FabrickErrorCodeMapper;
+import com.fabrick.test.transaction.manager.api.utils.GbsBankingPaymentsErrorCodeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,30 +19,30 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class BalanceService {
 
-    private final FabrickFeignClient fabrickClient;
+    private final GbsBankingClient fabrickClient;
 
     public Balance getAccountBalance(String accountId) {
         log.info("Requesting balance for accountId: {}", accountId);
 
         try {
-            FabrickApiResponse<Balance> apiResponse = fabrickClient.retrieveAccountBalance(accountId);
+            GbsBankingResponse<Balance> apiResponse = fabrickClient.retrieveAccountBalance(accountId);
 
-            // Il FabrickFeignErrorDecoder gestisce già tutti gli status HTTP 4xx/5xx lanciando eccezioni.
-            if (FabrickStatus.OK.equals(apiResponse.getStatus())) {
+            // Il GbsBankingFeignErrorDecoder gestisce già tutti gli status HTTP 4xx/5xx lanciando eccezioni.
+            if (GbsBankingStatus.OK.equals(apiResponse.getStatus())) {
                 log.debug("Balance successfully received for accountId: {}. Balance: {}", accountId, apiResponse.getPayload().getBalance());
                 return apiResponse.getPayload();
             } else {
-                log.warn("Fabrick API returned KO status for balance check with HTTP 200. AccountId: {}. Errors: {}", accountId, apiResponse.getErrors());
-                throw new FabrickApiBusinessException(apiResponse.getErrors(),
+                log.warn("GbsBanking API returned KO status for balance check with HTTP 200. AccountId: {}. Errors: {}", accountId, apiResponse.getErrors());
+                throw new GbsBankingBusinessException(apiResponse.getErrors(),
                         apiResponse.getErrors().stream()
-                                .map(error -> FabrickErrorCodeMapper.resolveInternalErrorCode(error, HttpStatus.OK))
+                                .map(error -> GbsBankingPaymentsErrorCodeMapper.resolveInternalErrorCode(error, HttpStatus.OK))
                                 .toList());
             }
-        } catch (FabrickApiBusinessException e) {
-            log.warn("Fabrick API business validation error during balance retrieval for account {}: {}", accountId, e.getMessage(), e);
+        } catch (GbsBankingBusinessException e) {
+            log.warn("GbsBanking API business validation error during balance retrieval for account {}: {}", accountId, e.getMessage(), e);
             throw e;
-        } catch (FabrickApiException e) {
-            log.error("Fabrick API HTTP error during balance retrieval for account {}: {}", accountId, e.getMessage());
+        } catch (GbsBankingApiException e) {
+            log.error("GbsBanking API HTTP error during balance retrieval for account {}: {}", accountId, e.getMessage());
             throw e;
         } catch (Exception e) {
             log.error("An unexpected error occurred while fetching balance for account {}: {}", accountId, e.getMessage(), e);
