@@ -1,4 +1,4 @@
-package com.fabrick.test.transaction.manager.api.dto.request;
+package com.fabrick.test.transaction.manager.api.dto.request.moneytransfer;
 
 import com.fabrick.test.transaction.manager.api.validation.ValidTaxRelief;
 import jakarta.validation.Valid;
