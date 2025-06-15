@@ -1,4 +1,4 @@
-package com.fabrick.test.transaction.manager.api.dto.request;
+package com.fabrick.test.transaction.manager.api.dto.request.moneytransfer;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

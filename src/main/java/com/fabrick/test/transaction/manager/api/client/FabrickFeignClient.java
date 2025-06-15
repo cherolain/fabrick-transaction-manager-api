@@ -2,7 +2,7 @@ package com.fabrick.test.transaction.manager.api.client;
 
 import com.fabrick.test.transaction.manager.api.configuration.FabrickFeignClientConfiguration;
 import com.fabrick.test.transaction.manager.api.dto.response.balance.Balance;
-import com.fabrick.test.transaction.manager.api.dto.request.MoneyTransferRequest;
+import com.fabrick.test.transaction.manager.api.dto.request.moneytransfer.MoneyTransferRequest;
 import com.fabrick.test.transaction.manager.api.dto.response.FabrickApiResponse;
 import com.fabrick.test.transaction.manager.api.dto.response.moneytransfer.MoneyTransferResponse;
 import org.springframework.cloud.openfeign.FeignClient;

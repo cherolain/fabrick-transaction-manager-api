@@ -1,6 +1,6 @@
 package com.fabrick.test.transaction.manager.api.controller;
 
-import com.fabrick.test.transaction.manager.api.dto.request.MoneyTransferRequest;
+import com.fabrick.test.transaction.manager.api.dto.request.moneytransfer.MoneyTransferRequest;
 import com.fabrick.test.transaction.manager.api.dto.response.balance.Balance;
 import com.fabrick.test.transaction.manager.api.dto.response.moneytransfer.MoneyTransferResponse;
 import com.fabrick.test.transaction.manager.api.service.AccountApplicationService;

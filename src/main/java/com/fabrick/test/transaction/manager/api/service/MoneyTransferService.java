@@ -2,7 +2,7 @@ package com.fabrick.test.transaction.manager.api.service;
 
 import com.fabrick.test.transaction.manager.api.client.FabrickFeignClient;
 import com.fabrick.test.transaction.manager.api.dto.FabrickStatus;
-import com.fabrick.test.transaction.manager.api.dto.request.MoneyTransferRequest;
+import com.fabrick.test.transaction.manager.api.dto.request.moneytransfer.MoneyTransferRequest;
 import com.fabrick.test.transaction.manager.api.dto.response.FabrickApiResponse;
 import com.fabrick.test.transaction.manager.api.dto.response.moneytransfer.MoneyTransferResponse;
 import com.fabrick.test.transaction.manager.api.exception.ErrorCode;
