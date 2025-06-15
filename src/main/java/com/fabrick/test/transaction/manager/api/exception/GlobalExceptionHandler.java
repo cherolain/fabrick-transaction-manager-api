@@ -17,15 +17,15 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     // ---
-    // Handler per FabrickApiException
-    // Gestisce errori di comunicazione HTTP (es. 400, 401, 403, 404, 500, 503) direttamente da Fabrick,
-    // come tradotti dal FabrickFeignErrorDecoder.
+    // Handler per GbsBankingApiException
+    // Gestisce errori di comunicazione HTTP (es. 400, 401, 403, 404, 500, 503) direttamente da GbsBanking,
+    // come tradotti dal GbsBankingFeignErrorDecoder.
     // ---
-    @ExceptionHandler(FabrickApiException.class)
-    public ResponseEntity<TransactionManagerApiResponse<?>> handleFabrickApiException(FabrickApiException ex) {
-        // ex.getMessage() contiene il messaggio dettagliato costruito nel FabrickFeignErrorDecoder
-        // (es. "Fabrick API returned an error: Unauthorized. Details: Credenziali API non valide o scadute")
-        log.error("Fabrick API HTTP error: {}. Status: {}. ErrorCode: {}", ex.getMessage(), ex.getHttpStatus(), ex.getErrorCode(), ex);
+    @ExceptionHandler(GbsBankingApiException.class)
+    public ResponseEntity<TransactionManagerApiResponse<?>> handleGbsBankingApiException(GbsBankingApiException ex) {
+        // ex.getMessage() contiene il messaggio dettagliato costruito nel GbsBankingFeignErrorDecoder
+        // (es. "GbsBanking API returned an error: Unauthorized. Details: Credenziali API non valide o scadute")
+        log.error("GbsBanking API HTTP error: {}. Status: {}. ErrorCode: {}", ex.getMessage(), ex.getHttpStatus(), ex.getErrorCode(), ex);
 
         return ResponseEntity.status(ex.getHttpStatus() != null ? ex.getHttpStatus() : HttpStatus.INTERNAL_SERVER_ERROR).body(
                 new TransactionManagerApiResponse<>(
@@ -39,16 +39,16 @@ public class GlobalExceptionHandler {
     }
 
     // ---
-    // Handler per FabrickApiBusinessException
-    // Gestisce errori di business da Fabrick (es. validazione input, come IBAN/CF non validi, ecc.),
-    // anche se Fabrick li ha restituiti con HTTP 200 ma con status "KO" interno,
+    // Handler per GbsBankingApiBusinessException
+    // Gestisce errori di business da GbsBanking (es. validazione input, come IBAN/CF non validi, ecc.),
+    // anche se GbsBanking li ha restituiti con HTTP 200 ma con status "KO" interno,
     // o con HTTP 400 e payload di errore.
     // ---
-    @ExceptionHandler(FabrickApiBusinessException.class)
-    public ResponseEntity<TransactionManagerApiResponse<?>> handleFabrickApiBusinessException(FabrickApiBusinessException ex) {
-        // ex.getMessage() contiene il messaggio dettagliato costruito nel FabrickFeignErrorDecoder
-        // (es. "Fabrick input validation error: Codice fiscale ordinante formalmente non valido")
-        log.warn("Fabrick business error: '{}'. Details: {}", ex.getMessage(), ex.getErrors(), ex);
+    @ExceptionHandler(GbsBankingBusinessException.class)
+    public ResponseEntity<TransactionManagerApiResponse<?>> handleGbsBankingApiBusinessException(GbsBankingBusinessException ex) {
+        // ex.getMessage() contiene il messaggio dettagliato costruito nel GbsBankingFeignErrorDecoder
+        // (es. "GbsBanking input validation error: Codice fiscale ordinante formalmente non valido")
+        log.warn("GbsBanking business error: '{}'. Details: {}", ex.getMessage(), ex.getErrors(), ex);
 
         // Il messaggio per il client sarà proprio ex.getMessage()
         // Il codice interno sarà ex.getErrorCode().getCode()
@@ -127,7 +127,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    private static List<TransactionManagerApiResponse.TransactionManagerError> getTransactionManagerErrors(FabrickApiBusinessException ex) {
+    private static List<TransactionManagerApiResponse.TransactionManagerError> getTransactionManagerErrors(GbsBankingBusinessException ex) {
         return ex.getErrorCodes().stream().map(
                 errorcode -> new TransactionManagerApiResponse.TransactionManagerError(
                         errorcode.getCode(),

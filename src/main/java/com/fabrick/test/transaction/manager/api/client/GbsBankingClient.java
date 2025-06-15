@@ -1,10 +1,10 @@
 package com.fabrick.test.transaction.manager.api.client;
 
-import com.fabrick.test.transaction.manager.api.configuration.FabrickFeignClientConfiguration;
+import com.fabrick.test.transaction.manager.api.configuration.GbsBankingConfiguration;
 import com.fabrick.test.transaction.manager.api.client.dto.request.transactions.TransactionSearchRequest;
 import com.fabrick.test.transaction.manager.api.client.dto.response.balance.Balance;
 import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.MoneyTransferRequest;
-import com.fabrick.test.transaction.manager.api.client.dto.response.FabrickApiResponse;
+import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
 import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferResponse;
 import com.fabrick.test.transaction.manager.api.client.dto.response.transactions.TransactionListResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@FeignClient(name = "fabrick", configuration = FabrickFeignClientConfiguration.class)
-public interface FabrickFeignClient {
+@FeignClient(name = "gbsBanking", configuration = GbsBankingConfiguration.class)
+public interface GbsBankingClient {
     /**
-     * Base URL for the Fabrick API.
+     * Base URL for the GbsBanking API.
      */
     String BALANCE_ENDPOINT = "/api/gbs/banking/v4.0/accounts/{accountId}/balance";
     String MONEY_TRANSFER_ENDPOINT = "/api/gbs/banking/v4.0/accounts/{accountId}/payments/money-transfers";
@@ -28,10 +28,10 @@ public interface FabrickFeignClient {
      * Retrieves the balance of a specified account.
      *
      * @param accountId The unique identifier of the account for which the balance is requested.
-     * @return A {@link FabrickApiResponse} containing the {@link Balance} details of the specified account.
+     * @return A {@link GbsBankingResponse} containing the {@link Balance} details of the specified account.
      */
     @RequestMapping(method = RequestMethod.GET, value = BALANCE_ENDPOINT)
-    FabrickApiResponse<Balance> retrieveAccountBalance(@PathVariable String accountId);
+    GbsBankingResponse<Balance> retrieveAccountBalance(@PathVariable String accountId);
 
 
     /**
@@ -39,10 +39,10 @@ public interface FabrickFeignClient {
      *
      * @param accountId The unique identifier of the account from which the money transfer is initiated.
      * @param moneyTransferResponseRequest The request object containing the details of the money transfer to be created.
-     * @return A {@link FabrickApiResponse} containing the {@link MoneyTransferResponse} with the details of the created money transfer.
+     * @return A {@link GbsBankingResponse} containing the {@link MoneyTransferResponse} with the details of the created money transfer.
      */
     @RequestMapping(method = RequestMethod.POST, value = MONEY_TRANSFER_ENDPOINT)
-    FabrickApiResponse<MoneyTransferResponse> createMoneyTransfer(
+    GbsBankingResponse<MoneyTransferResponse> createMoneyTransfer(
             @PathVariable String accountId,
             @RequestBody MoneyTransferRequest moneyTransferResponseRequest,
             @RequestHeader("X-Time-Zone") String timeZoneHeader
@@ -53,10 +53,10 @@ public interface FabrickFeignClient {
      *
      * @param accountId The unique identifier of the account for which transactions are requested.
      * @param searchRequest The request object containing the date range and other search parameters for filtering transactions.
-     * @return A {@link FabrickApiResponse} containing a {@link TransactionListResponse} with the list of transactions matching the search criteria.
+     * @return A {@link GbsBankingResponse} containing a {@link TransactionListResponse} with the list of transactions matching the search criteria.
      */
     @RequestMapping(method = RequestMethod.GET, value = TRANSACTION_ENDPOINT)
-    FabrickApiResponse<TransactionListResponse> retrieveAccountTransactions(
+    GbsBankingResponse<TransactionListResponse> retrieveAccountTransactions(
             @PathVariable String accountId,
             @SpringQueryMap TransactionSearchRequest searchRequest
     );

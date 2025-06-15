@@ -1,10 +1,10 @@
 package com.fabrick.test.transaction.manager.api.service;
 
-import com.fabrick.test.transaction.manager.api.client.FabrickFeignClient;
-import com.fabrick.test.transaction.manager.api.client.dto.FabrickStatus;
+import com.fabrick.test.transaction.manager.api.client.GbsBankingClient;
+import com.fabrick.test.transaction.manager.api.client.dto.GbsBankingStatus;
 import com.fabrick.test.transaction.manager.api.client.dto.response.balance.Balance;
-import com.fabrick.test.transaction.manager.api.client.dto.response.FabrickApiResponse;
-import com.fabrick.test.transaction.manager.api.utils.FabrickErrorCodeMapper;
+import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
+import com.fabrick.test.transaction.manager.api.utils.GbsBankingPaymentsErrorCodeMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,10 +21,10 @@ import static org.mockito.Mockito.*;
 class AccountServiceTest {
 
     @Mock
-    private FabrickFeignClient fabrickClient;
+    private GbsBankingClient fabrickClient;
 
     @Mock
-    private FabrickErrorCodeMapper fabrickErrorCodeMapper;
+    private GbsBankingPaymentsErrorCodeMapper gbsBankingPaymentsErrorCodeMapper;
 
     @InjectMocks
     private BalanceService balanceService;
@@ -34,16 +34,16 @@ class AccountServiceTest {
     // --- Tests for getAccountBalance ---
 
     @Test
-    @DisplayName("Should return balance when Fabrick status is OK")
-    void getAccountBalance_shouldReturnBalance_whenFabrickStatusIsOk() {
-        // Given: An accountId and a mock FabrickApiResponse with OK status
+    @DisplayName("Should return balance when GbsBanking status is OK")
+    void getAccountBalance_shouldReturnBalance_whenGbsBankingStatusIsOk() {
+        // Given: An accountId and a mock GbsBankingApiResponse with OK status
         Balance balance = new Balance(
                 LocalDate.now(),
                 BigDecimal.valueOf(1000.50),
                 BigDecimal.valueOf(950.00),
                 "EUR"
         );
-        FabrickApiResponse<Balance> mockResponse = new FabrickApiResponse<>(FabrickStatus.OK, null, balance);
+        GbsBankingResponse<Balance> mockResponse = new GbsBankingResponse<>(GbsBankingStatus.OK, null, balance);
 
         // When: fabrickClient.getBalance is called and returns the mockResponse
         when(fabrickClient.retrieveAccountBalance(ACCOUNT_ID)).thenReturn(mockResponse);
@@ -54,6 +54,6 @@ class AccountServiceTest {
         assertNotNull(result);
         assertEquals(BigDecimal.valueOf(1000.50), result.getBalance());
         verify(fabrickClient, times(1)).retrieveAccountBalance(ACCOUNT_ID);
-        verifyNoInteractions(fabrickErrorCodeMapper);
+        verifyNoInteractions(gbsBankingPaymentsErrorCodeMapper);
     }
 }

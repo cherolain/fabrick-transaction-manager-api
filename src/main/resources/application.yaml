@@ -9,11 +9,16 @@ spring:
     driverClassName: org.h2.Driver
     username: sa
     password: password
+  docker:
+    compose:
+      enabled: false
+      file: wiremock/docker-compose.yml
+
   cloud:
     openfeign:
       client:
         config:
-          fabrick:
+          gbsBanking:
             # test-account-id: 14537780
             # url: https://sandbox.platfr.io
             url: http://localhost:8181 # WireMock server URL

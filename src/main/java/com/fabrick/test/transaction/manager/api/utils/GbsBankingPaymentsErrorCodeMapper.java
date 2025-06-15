@@ -1,16 +1,16 @@
 package com.fabrick.test.transaction.manager.api.utils;
 
-import com.fabrick.test.transaction.manager.api.client.dto.response.FabrickApiResponse;
+import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
 import com.fabrick.test.transaction.manager.api.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-public class FabrickErrorCodeMapper {
+public class GbsBankingPaymentsErrorCodeMapper {
 
-    public static ErrorCode resolveInternalErrorCode(FabrickApiResponse.FabrickError fabrickError, HttpStatus httpStatus) {
-        if (fabrickError != null && fabrickError.getCode() != null) {
-            String fabrickCode = fabrickError.getCode();
+    public static ErrorCode resolveInternalErrorCode(GbsBankingResponse.GbsBankingError gbsBankingError, HttpStatus httpStatus) {
+        if (gbsBankingError != null && gbsBankingError.getCode() != null) {
+            String gbsBankingCode = gbsBankingError.getCode();
 
-            return switch (fabrickCode) {
+            return switch (gbsBankingCode) {
                 case "API000", "REQ007", "API004" -> ErrorCode.BAD_REQUEST;
                 default -> mapHttpStatusToErrorCode(httpStatus);
             };
