@@ -1,9 +1,9 @@
 package com.fabrick.test.transaction.manager.api;
 
-import com.fabrick.test.transaction.manager.api.dto.request.moneytransfer.CreditorAccountRequest;
-import com.fabrick.test.transaction.manager.api.dto.request.moneytransfer.CreditorRequest;
-import com.fabrick.test.transaction.manager.api.dto.request.moneytransfer.MoneyTransferRequest;
-import com.fabrick.test.transaction.manager.api.dto.response.moneytransfer.*;
+import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.CreditorAccountRequest;
+import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.CreditorRequest;
+import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.MoneyTransferRequest;
+import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

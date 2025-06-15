@@ -1,6 +1,6 @@
 package com.fabrick.test.transaction.manager.api.dto.request;
 
-import com.fabrick.test.transaction.manager.api.dto.request.moneytransfer.*;
+import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.*;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

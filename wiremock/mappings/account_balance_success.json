@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/api/gbs/banking/v4.0/accounts/14537780/balance"
+  },
+  "response": {
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "status": 200,
+    "jsonBody": {
+      "status": "OK",
+      "errors": [],
+      "payload": {
+        "date": "2018-08-17",
+        "balance": 29.64,
+        "availableBalance": 29.64,
+        "currency": "EUR"
+      }
+    }
+  }
+}

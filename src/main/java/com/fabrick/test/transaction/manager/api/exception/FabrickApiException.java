@@ -8,15 +8,10 @@ public class FabrickApiException extends RuntimeException {
     private final HttpStatus httpStatus;
     private final ErrorCode errorCode;
 
-    public FabrickApiException(String message, HttpStatus httpStatus, ErrorCode errorCode) {
-        super(message);
+    public FabrickApiException(HttpStatus httpStatus, ErrorCode errorCode) {
+        super(errorCode.getDefaultMessage());
         this.httpStatus = httpStatus;
         this.errorCode = errorCode;
     }
 
-    public FabrickApiException(String message, Throwable cause, HttpStatus httpStatus, ErrorCode errorCode) {
-        super(message, cause);
-        this.httpStatus = httpStatus;
-        this.errorCode = errorCode;
-    }
 }

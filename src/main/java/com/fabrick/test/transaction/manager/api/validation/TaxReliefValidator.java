@@ -1,6 +1,6 @@
 package com.fabrick.test.transaction.manager.api.validation;
 
-import com.fabrick.test.transaction.manager.api.dto.request.moneytransfer.TaxReliefRequest;
+import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.TaxReliefRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

@@ -1,0 +1,11 @@
+# Sample compose file
+version: "3"
+services:
+  wiremock:
+    image: "wiremock/wiremock:latest"
+    container_name: my_wiremock
+    ports:
+      - 8181:8080
+    volumes:
+      - ./mappings:/home/wiremock/mappings
+    entrypoint: ["/docker-entrypoint.sh", "--global-response-templating", "--disable-gzip", "--verbose"]

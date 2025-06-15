@@ -1,9 +1,9 @@
 package com.fabrick.test.transaction.manager.api.service;
 
 import com.fabrick.test.transaction.manager.api.client.FabrickFeignClient;
-import com.fabrick.test.transaction.manager.api.dto.FabrickStatus;
-import com.fabrick.test.transaction.manager.api.dto.response.balance.Balance;
-import com.fabrick.test.transaction.manager.api.dto.response.FabrickApiResponse;
+import com.fabrick.test.transaction.manager.api.client.dto.FabrickStatus;
+import com.fabrick.test.transaction.manager.api.client.dto.response.balance.Balance;
+import com.fabrick.test.transaction.manager.api.client.dto.response.FabrickApiResponse;
 import com.fabrick.test.transaction.manager.api.utils.FabrickErrorCodeMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,14 +46,14 @@ class AccountServiceTest {
         FabrickApiResponse<Balance> mockResponse = new FabrickApiResponse<>(FabrickStatus.OK, null, balance);
 
         // When: fabrickClient.getBalance is called and returns the mockResponse
-        when(fabrickClient.getBalance(ACCOUNT_ID)).thenReturn(mockResponse);
+        when(fabrickClient.retrieveAccountBalance(ACCOUNT_ID)).thenReturn(mockResponse);
 
         // Then: The method should return the correct Balance and interactions should be as expected
         Balance result = balanceService.getAccountBalance(ACCOUNT_ID);
 
         assertNotNull(result);
         assertEquals(BigDecimal.valueOf(1000.50), result.getBalance());
-        verify(fabrickClient, times(1)).getBalance(ACCOUNT_ID);
+        verify(fabrickClient, times(1)).retrieveAccountBalance(ACCOUNT_ID);
         verifyNoInteractions(fabrickErrorCodeMapper);
     }
 }

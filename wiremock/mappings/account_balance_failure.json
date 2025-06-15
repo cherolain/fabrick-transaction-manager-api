@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/api/gbs/banking/v4.0/accounts/1/balance"
+  },
+  "response": {
+    "status": 500,
+    "jsonBody": {
+      "status": "KO",
+      "errors": [
+        {
+          "code": "GTW900",
+          "description": "Generic Error",
+          "params": ""
+        }
+      ],
+      "payload": {}
+    }
+  }
+}
