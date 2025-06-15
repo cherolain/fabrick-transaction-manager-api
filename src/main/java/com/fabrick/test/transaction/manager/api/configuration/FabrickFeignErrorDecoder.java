@@ -1,71 +1,59 @@
 package com.fabrick.test.transaction.manager.api.configuration;
 
-import com.fabrick.test.transaction.manager.api.dto.FabrickStatus;
+import com.fabrick.test.transaction.manager.api.dto.response.FabrickApiResponse;
 import com.fabrick.test.transaction.manager.api.exception.ErrorCode;
+import com.fabrick.test.transaction.manager.api.exception.FabrickApiBusinessException;
 import com.fabrick.test.transaction.manager.api.exception.FabrickApiException;
-import com.fabrick.test.transaction.manager.api.exception.FabrickApiForbiddenException;
+import com.fabrick.test.transaction.manager.api.utils.FabrickErrorCodeMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-@Slf4j
+import java.io.IOException;
+import java.io.InputStream;
+
+@RequiredArgsConstructor
 public class FabrickFeignErrorDecoder implements ErrorDecoder {
-    private static final Pattern STATUS_PATTERN = Pattern.compile("\"status\"\\s*:\\s*\"(\\w+)\"");
+
+    private final ObjectMapper objectMapper;
+    private final FabrickErrorCodeMapper fabrickErrorCodeMapper;
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        HttpStatus status = HttpStatus.valueOf(response.status());
-        String responseBody = extractResponseBody(response);
+        HttpStatus httpStatus = HttpStatus.valueOf(response.status());
+        FabrickApiResponse.FabrickError fabrickError = null;
 
-        // Log error details
-        log.error("Feign client error. Method: {}, Status: {}, Body: {}",
-                methodKey, status, responseBody);
-
-        FabrickStatus fabrickStatus = extractFabrickStatus(responseBody);
-
-        // Map status codes to exceptions
-        switch (status) {
-            case BAD_REQUEST:
-                return new FabrickApiException(ErrorCode.EXTERNAL_API_FAILURE.getDefaultMessage(), status, fabrickStatus,ErrorCode.EXTERNAL_API_FAILURE);
-            case UNAUTHORIZED:
-                return new FabrickApiException(ErrorCode.UNAUTHORIZED.getDefaultMessage(), status, fabrickStatus, ErrorCode.UNAUTHORIZED);
-            case FORBIDDEN:
-                return new FabrickApiForbiddenException(ErrorCode.FORBIDDEN.getDefaultMessage());
-            case NOT_FOUND:
-                return new FabrickApiException(ErrorCode.NOT_FOUND.getDefaultMessage(), status, fabrickStatus, ErrorCode.NOT_FOUND);
-            case INTERNAL_SERVER_ERROR:
-                return new FabrickApiException(ErrorCode.EXTERNAL_API_FAILURE.getDefaultMessage(), status, fabrickStatus, ErrorCode.EXTERNAL_API_FAILURE);
-            case SERVICE_UNAVAILABLE:
-                return new FabrickApiException(ErrorCode.SERVICE_UNAVAILABLE.getDefaultMessage(), status, fabrickStatus, ErrorCode.SERVICE_UNAVAILABLE);
-            default:
-                return new Exception("Unexpected error occurred. Please contact support.");
+        try (InputStream body = response.body() != null ? response.body().asInputStream() : null) {
+            if (body != null && body.available() > 0) {
+                FabrickApiResponse<?> apiResponse = objectMapper.readValue(body, FabrickApiResponse.class);
+                if (apiResponse.getErrors() != null && !apiResponse.getErrors().isEmpty()) {
+                    fabrickError = apiResponse.getErrors().getFirst();
+                }
+            }
+        } catch (IOException e) {
+            return new FabrickApiException("Failed to parse Fabrick error response.", httpStatus, ErrorCode.EXTERNAL_API_FAILURE);
         }
+
+        ErrorCode internalErrorCode = fabrickErrorCodeMapper.resolveInternalErrorCode(fabrickError, httpStatus);
+
+        if (httpStatus == HttpStatus.BAD_REQUEST && fabrickError != null) {
+            return new FabrickApiBusinessException(
+                    fabrickError.getDescription(),
+                    java.util.List.of(fabrickError),
+                    internalErrorCode
+            );
+        }
+
+        // Switch per status noti, senza dettagli Fabrick
+        return switch (httpStatus) {
+            case UNAUTHORIZED -> new FabrickApiException(ErrorCode.UNAUTHORIZED.getDefaultMessage(), httpStatus, ErrorCode.UNAUTHORIZED);
+            case FORBIDDEN -> new FabrickApiException(ErrorCode.FORBIDDEN.getDefaultMessage(), httpStatus, ErrorCode.FORBIDDEN);
+            case NOT_FOUND -> new FabrickApiException(ErrorCode.NOT_FOUND.getDefaultMessage(), httpStatus, ErrorCode.NOT_FOUND);
+            case INTERNAL_SERVER_ERROR -> new FabrickApiException(ErrorCode.INTERNAL_SERVER_ERROR.getDefaultMessage(), httpStatus, ErrorCode.EXTERNAL_API_FAILURE);
+            case SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT -> new FabrickApiException(ErrorCode.SERVICE_UNAVAILABLE.getDefaultMessage(), httpStatus, ErrorCode.SERVICE_UNAVAILABLE);
+            default -> new FabrickApiException(ErrorCode.EXTERNAL_API_FAILURE.getDefaultMessage(), httpStatus, ErrorCode.EXTERNAL_API_FAILURE);
+        };
     }
-
-    private String extractResponseBody(Response response) {
-        if (response.body() == null) {
-            return "No response body";
-        }
-
-        try {
-            return new String(response.body().asInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        } catch (IOException ex) {
-            log.error("Failed to read response body", ex);
-            return "Error reading response body";
-        }
-    }
-
-    private FabrickStatus extractFabrickStatus(String responseBody) {
-        Matcher matcher = STATUS_PATTERN.matcher(responseBody);
-        if (matcher.find()) {
-            return FabrickStatus.valueOf(matcher.group(1));
-        }
-        return null;
-    }
-
 }

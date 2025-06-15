@@ -1,7 +1,10 @@
-package com.fabrick.test.transaction.manager.api.dto;
+package com.fabrick.test.transaction.manager.api.dto.response.balance;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -9,8 +12,10 @@ import java.time.LocalDate;
  * Data Transfer Object (DTO) that represents the balance of a bank account.
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BalanceDto {
+public class Balance {
 
     /**
      * Date of the balance.
