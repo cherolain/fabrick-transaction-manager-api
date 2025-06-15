@@ -1,5 +1,6 @@
 package com.fabrick.test.transaction.manager.api.exception;
 
+import com.fabrick.test.transaction.manager.api.model.TransactionManagerApiResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -8,16 +9,12 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
-
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-
-    // La tua definizione esistente di ErrorResponse
-    public record ErrorResponse(String code, String description) {}
 
     // ---
     // Handler per FabrickApiException
@@ -25,17 +22,19 @@ public class GlobalExceptionHandler {
     // come tradotti dal FabrickFeignErrorDecoder.
     // ---
     @ExceptionHandler(FabrickApiException.class)
-    public ResponseEntity<ErrorResponse> handleFabrickApiException(FabrickApiException ex) {
+    public ResponseEntity<TransactionManagerApiResponse<?>> handleFabrickApiException(FabrickApiException ex) {
         // ex.getMessage() contiene il messaggio dettagliato costruito nel FabrickFeignErrorDecoder
         // (es. "Fabrick API returned an error: Unauthorized. Details: Credenziali API non valide o scadute")
         log.error("Fabrick API HTTP error: {}. Status: {}. ErrorCode: {}", ex.getMessage(), ex.getHttpStatus(), ex.getErrorCode(), ex);
 
-        // Il messaggio per il client sarà proprio ex.getMessage()
-        // Il codice interno sarà ex.getErrorCode().getCode()
-        return buildErrorResponseEntity(
-                ex.getErrorCode() != null ? ex.getErrorCode().getCode() : ErrorCode.EXTERNAL_API_FAILURE.getCode(),
-                ex.getMessage(),
-                ex.getHttpStatus() != null ? ex.getHttpStatus() : HttpStatus.INTERNAL_SERVER_ERROR
+        return ResponseEntity.status(ex.getHttpStatus() != null ? ex.getHttpStatus() : HttpStatus.INTERNAL_SERVER_ERROR).body(
+                new TransactionManagerApiResponse<>(
+                        null,
+                        List.of(new TransactionManagerApiResponse.TransactionManagerError(
+                                ex.getErrorCode() != null ? ex.getErrorCode().getCode() : ErrorCode.INTERNAL_SERVER_ERROR.getCode(),
+                                ex.getMessage()
+                        ))
+                )
         );
     }
 
@@ -46,36 +45,18 @@ public class GlobalExceptionHandler {
     // o con HTTP 400 e payload di errore.
     // ---
     @ExceptionHandler(FabrickApiBusinessException.class)
-    public ResponseEntity<ErrorResponse> handleFabrickApiBusinessException(FabrickApiBusinessException ex) {
+    public ResponseEntity<TransactionManagerApiResponse<?>> handleFabrickApiBusinessException(FabrickApiBusinessException ex) {
         // ex.getMessage() contiene il messaggio dettagliato costruito nel FabrickFeignErrorDecoder
         // (es. "Fabrick input validation error: Codice fiscale ordinante formalmente non valido")
         log.warn("Fabrick business error: '{}'. Details: {}", ex.getMessage(), ex.getErrors(), ex);
 
         // Il messaggio per il client sarà proprio ex.getMessage()
         // Il codice interno sarà ex.getErrorCode().getCode()
-        return buildErrorResponseEntity(
-                ex.getErrorCode() != null ? ex.getErrorCode().getCode() : ErrorCode.BUSINESS_ERROR.getCode(),
-                ex.getMessage(), // **Qui propaghiamo il messaggio parlante**
-                HttpStatus.BAD_REQUEST // Per errori di business/validazione, restituiamo 400
-        );
-    }
-
-    // ---
-    // Handler per InternalApplicationException
-    // Gestisce errori interni inaspettati della tua applicazione.
-    // ---
-    @ExceptionHandler(InternalApplicationException.class)
-    public ResponseEntity<ErrorResponse> handleInternalApplicationException(InternalApplicationException ex) {
-        log.error("Internal application error occurred: {}", ex.getMessage(), ex);
-
-        // Per errori interni, di solito si preferisce un messaggio generico per il client
-        // per non esporre dettagli di implementazione o stack trace.
-        String clientMessage = ex.getErrorCode() != null ? ex.getErrorCode().getDefaultMessage() : ErrorCode.UNEXPECTED_ERROR.getDefaultMessage();
-
-        return buildErrorResponseEntity(
-                ex.getErrorCode() != null ? ex.getErrorCode().getCode() : ErrorCode.UNEXPECTED_ERROR.getCode(),
-                clientMessage, // Messaggio generico per il client
-                HttpStatus.INTERNAL_SERVER_ERROR
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new TransactionManagerApiResponse<>(
+                        null,
+                        getTransactionManagerErrors(ex)
+                )
         );
     }
 
@@ -83,7 +64,7 @@ public class GlobalExceptionHandler {
     // Handler per MethodArgumentNotValidException (Errori di validazione @Valid nei DTO di richiesta)
     // ---
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<TransactionManagerApiResponse<?>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         String validationDetails = ex.getBindingResult().getAllErrors().stream()
                 .map(error -> {
                     if (error instanceof FieldError fieldError) {
@@ -96,11 +77,14 @@ public class GlobalExceptionHandler {
         log.warn("Request validation failed: {}", validationDetails, ex);
 
         String clientMessage = ErrorCode.VALIDATION_ERROR.getDefaultMessage() + " " + validationDetails;
-
-        return buildErrorResponseEntity(
-                ErrorCode.VALIDATION_ERROR.getCode(),
-                clientMessage,
-                HttpStatus.BAD_REQUEST
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new TransactionManagerApiResponse<>(
+                        null,
+                        List.of(new TransactionManagerApiResponse.TransactionManagerError(
+                                ErrorCode.VALIDATION_ERROR.getCode(),
+                                clientMessage
+                        ))
+                )
         );
     }
 
@@ -108,32 +92,21 @@ public class GlobalExceptionHandler {
     // Handler per ConstraintViolationException (Errori di validazione @Validated su parametri/variabili di path)
     // ---
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+    public ResponseEntity<TransactionManagerApiResponse<?>> handleConstraintViolation(ConstraintViolationException ex) {
         String constraintDetails = ex.getConstraintViolations().stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                 .collect(Collectors.joining("; "));
 
         log.warn("Constraint violation for request parameters: {}", constraintDetails, ex);
-
         String clientMessage = ErrorCode.INVALID_PATH_VARIABLE.getDefaultMessage() + " " + constraintDetails;
-
-        return buildErrorResponseEntity(
-                ErrorCode.INVALID_PATH_VARIABLE.getCode(),
-                clientMessage,
-                HttpStatus.BAD_REQUEST
-        );
-    }
-
-    // ---
-    // Handler per NoResourceFoundException (Spring Web - risorsa non trovata o metodo HTTP non supportato)
-    // ---
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex) {
-        log.warn("Resource not found or unsupported method: {}", ex.getMessage(), ex);
-        return buildErrorResponseEntity(
-                ErrorCode.NOT_FOUND.getCode(),
-                ErrorCode.NOT_FOUND.getDefaultMessage(),
-                HttpStatus.NOT_FOUND
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new TransactionManagerApiResponse<>(
+                        null,
+                        List.of(new TransactionManagerApiResponse.TransactionManagerError(
+                                ErrorCode.INVALID_PATH_VARIABLE.getCode(),
+                                clientMessage
+                        ))
+                )
         );
     }
 
@@ -141,19 +114,25 @@ public class GlobalExceptionHandler {
     // Handler catch-all per tutte le altre eccezioni non gestite esplicitamente.
     // ---
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+    public ResponseEntity<TransactionManagerApiResponse<?>> handleGenericException(Exception ex) {
         log.error("An unhandled exception occurred: {}", ex.getMessage(), ex);
-        return buildErrorResponseEntity(
-                ErrorCode.UNEXPECTED_ERROR.getCode(), // Cambiato da GENERIC_ERROR
-                ErrorCode.UNEXPECTED_ERROR.getDefaultMessage(), // Cambiato da GENERIC_ERROR
-                HttpStatus.INTERNAL_SERVER_ERROR
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                new TransactionManagerApiResponse<>(
+                        null,
+                        List.of(new TransactionManagerApiResponse.TransactionManagerError(
+                                ErrorCode.UNEXPECTED_ERROR.getCode(),
+                                ErrorCode.UNEXPECTED_ERROR.getDefaultMessage()
+                        ))
+                )
         );
     }
 
-    // ---
-    // Metodo di utilità per costruire in modo consistente la ResponseEntity.
-    // ---
-    private ResponseEntity<ErrorResponse> buildErrorResponseEntity(String code, String description, HttpStatus status) {
-        return new ResponseEntity<>(new ErrorResponse(code, description), status);
+    private static List<TransactionManagerApiResponse.TransactionManagerError> getTransactionManagerErrors(FabrickApiBusinessException ex) {
+        return ex.getErrorCodes().stream().map(
+                errorcode -> new TransactionManagerApiResponse.TransactionManagerError(
+                        errorcode.getCode(),
+                        errorcode.getDefaultMessage()
+                )
+        ).collect(Collectors.toList());
     }
 }

@@ -14,8 +14,9 @@ spring:
       client:
         config:
           fabrick:
-            #      test-account-id: 14537780
-            url: https://sandbox.platfr.io
+            # test-account-id: 14537780
+            # url: https://sandbox.platfr.io
+            url: http://localhost:8181 # WireMock server URL
             connectTimeout: 5000
             readTimeout: 5000
             loggerLevel: full
