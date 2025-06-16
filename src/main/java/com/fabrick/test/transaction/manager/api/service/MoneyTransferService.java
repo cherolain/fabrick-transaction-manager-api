@@ -43,26 +43,25 @@ public class MoneyTransferService {
     }
 
     private MoneyTransferResponse handleGbsBankingResponse(String accountId, GbsBankingResponse<MoneyTransferResponse> response) {
-        if (GbsBankingStatus.KO.equals(response.getStatus()) && response.getErrors() != null && !response.getErrors().isEmpty()) {
-            if (isBp049Error(response)) {
-                log.warn("Money transfer completed with GbsBanking business warning BP049 for accountId: {}. Response: {}", accountId, response.getPayload());
-                return response.getPayload();
-            }
-        }
-
         if (GbsBankingStatus.OK.equals(response.getStatus())) {
             log.info("Money transfer successful for account ID: {}. Transfer ID: {}", accountId, response.getPayload().getMoneyTransferId());
             return response.getPayload();
         }
 
-        log.error("GbsBanking API returned KO status with HTTP 200 for money transfer for account ID: {}. Errors: {}", accountId, response.getErrors());
-        throw new GbsBankingBusinessException(response.getErrors(),
-                response.getErrors().stream()
-                        .map(error -> GbsBankingErrorCodeMapper.resolveInternalErrorCode(error, HttpStatus.OK))
-                        .toList());
-    }
+        // Usa GbsBankingStatus.KO per il confronto
+        if (GbsBankingStatus.KO.equals(response.getStatus())) {
+            log.error("GbsBanking API returned KO status with HTTP 200 for money transfer for account ID: {}. Errors: {}", accountId, response.getErrors());
+            throw new GbsBankingBusinessException(response.getErrors(),
+                    response.getErrors().stream()
+                            .map(error -> GbsBankingErrorCodeMapper.resolveInternalErrorCode(error, HttpStatus.OK))
+                            .toList());
+        }
 
-    private boolean isBp049Error(GbsBankingResponse<MoneyTransferResponse> response) {
-        return response.getErrors().stream().anyMatch(error -> "API000".equals(error.getCode()) && error.getDescription() != null && error.getDescription().contains("BP049"));
+        // Questo caso non dovrebbe mai accadere se GbsBankingStatus copre tutti i casi.
+        log.error("GbsBanking API returned an unhandled status for transaction fetch for account ID: {}. Status: {}", accountId, response.getStatus());
+        throw new InternalApplicationException(
+                "GbsBanking API returned an unhandled status for transaction fetch.",
+                ErrorCode.UNEXPECTED_ERROR
+        );
     }
 }

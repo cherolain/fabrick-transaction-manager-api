@@ -49,11 +49,7 @@ public class TransactionService {
         // Usa GbsBankingStatus.OK per il confronto
         if (GbsBankingStatus.OK.equals(response.getStatus())) {
             log.info("Transactions fetched successfully for account ID: {}.", accountId);
-            return Optional.ofNullable(response.getPayload())
-                    .orElseThrow(() -> new InternalApplicationException(
-                            "GbsBanking API returned OK status but null transactions payload for account " + accountId,
-                            ErrorCode.UNEXPECTED_ERROR
-                    ));
+            return response.getPayload();
         }
 
         // Usa GbsBankingStatus.KO per il confronto

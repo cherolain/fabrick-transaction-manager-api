@@ -44,20 +44,6 @@ class TransactionServiceTest {
     }
 
     @Test
-    public void testCreateTransactionNoPayload() {
-        var gbsBankingResponse = Mockito.mock(GbsBankingResponse.class);
-        Mockito.when(gbsBankingClient.retrieveAccountTransactions(Mockito.any(), Mockito.any())).thenReturn(gbsBankingResponse);
-        Mockito.when(gbsBankingResponse.getStatus()).thenReturn(GbsBankingStatus.OK);
-        Mockito.when(gbsBankingResponse.getPayload()).thenReturn(null);
-
-        try {
-            transactionService.getTransactions("123", new TransactionSearchRequest());
-            Assertions.fail();
-        } catch (InternalApplicationException ignored) {
-        }
-    }
-
-    @Test
     public void testCreateTransactionKO() {
         var gbsBankingResponse = Mockito.mock(GbsBankingResponse.class);
         Mockito.when(gbsBankingClient.retrieveAccountTransactions(Mockito.any(), Mockito.any())).thenReturn(gbsBankingResponse);
