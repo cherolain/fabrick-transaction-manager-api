@@ -4,7 +4,7 @@ import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingRe
 import com.fabrick.test.transaction.manager.api.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-public class GbsBankingPaymentsErrorCodeMapper {
+public class GbsBankingErrorCodeMapper {
 
     public static ErrorCode resolveInternalErrorCode(GbsBankingResponse.GbsBankingError gbsBankingError, HttpStatus httpStatus) {
         if (gbsBankingError != null && gbsBankingError.getCode() != null) {

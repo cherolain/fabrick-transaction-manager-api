@@ -4,7 +4,7 @@ import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingRe
 import com.fabrick.test.transaction.manager.api.exception.ErrorCode;
 import com.fabrick.test.transaction.manager.api.exception.GbsBankingBusinessException;
 import com.fabrick.test.transaction.manager.api.exception.GbsBankingApiException;
-import com.fabrick.test.transaction.manager.api.utils.GbsBankingPaymentsErrorCodeMapper;
+import com.fabrick.test.transaction.manager.api.utils.GbsBankingErrorCodeMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;
@@ -42,7 +42,7 @@ public class GbsBankingErrorDecoder implements ErrorDecoder {
         List<ErrorCode> internalErrorCodes =
                 gbsBankingErrors.
                         stream().
-                        map(error -> GbsBankingPaymentsErrorCodeMapper.resolveInternalErrorCode(error, httpStatus))
+                        map(error -> GbsBankingErrorCodeMapper.resolveInternalErrorCode(error, httpStatus))
                         .collect(java.util.stream.Collectors.toList());
 
         if (httpStatus == HttpStatus.BAD_REQUEST) {

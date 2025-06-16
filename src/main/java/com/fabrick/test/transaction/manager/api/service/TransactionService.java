@@ -9,7 +9,7 @@ import com.fabrick.test.transaction.manager.api.exception.ErrorCode;
 import com.fabrick.test.transaction.manager.api.exception.GbsBankingBusinessException;
 import com.fabrick.test.transaction.manager.api.exception.GbsBankingApiException;
 import com.fabrick.test.transaction.manager.api.exception.InternalApplicationException;
-import com.fabrick.test.transaction.manager.api.utils.GbsBankingPaymentsErrorCodeMapper;
+import com.fabrick.test.transaction.manager.api.utils.GbsBankingErrorCodeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -61,7 +61,7 @@ public class TransactionService {
             log.error("GbsBanking API returned KO status with HTTP 200 for transaction fetch for account ID: {}. Errors: {}", accountId, response.getErrors());
             throw new GbsBankingBusinessException(response.getErrors(),
                     response.getErrors().stream()
-                            .map(error -> GbsBankingPaymentsErrorCodeMapper.resolveInternalErrorCode(error, HttpStatus.OK))
+                            .map(error -> GbsBankingErrorCodeMapper.resolveInternalErrorCode(error, HttpStatus.OK))
                             .toList());
         }
 

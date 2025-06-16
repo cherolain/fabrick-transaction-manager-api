@@ -8,7 +8,7 @@ import com.fabrick.test.transaction.manager.api.exception.ErrorCode;
 import com.fabrick.test.transaction.manager.api.exception.GbsBankingBusinessException;
 import com.fabrick.test.transaction.manager.api.exception.GbsBankingApiException;
 import com.fabrick.test.transaction.manager.api.exception.InternalApplicationException;
-import com.fabrick.test.transaction.manager.api.utils.GbsBankingPaymentsErrorCodeMapper;
+import com.fabrick.test.transaction.manager.api.utils.GbsBankingErrorCodeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,7 +35,7 @@ public class BalanceService {
                 log.warn("GbsBanking API returned KO status for balance check with HTTP 200. AccountId: {}. Errors: {}", accountId, apiResponse.getErrors());
                 throw new GbsBankingBusinessException(apiResponse.getErrors(),
                         apiResponse.getErrors().stream()
-                                .map(error -> GbsBankingPaymentsErrorCodeMapper.resolveInternalErrorCode(error, HttpStatus.OK))
+                                .map(error -> GbsBankingErrorCodeMapper.resolveInternalErrorCode(error, HttpStatus.OK))
                                 .toList());
             }
         } catch (GbsBankingBusinessException e) {
