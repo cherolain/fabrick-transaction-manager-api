@@ -8,7 +8,7 @@ import com.fabrick.test.transaction.manager.api.exception.ErrorCode;
 import com.fabrick.test.transaction.manager.api.exception.GbsBankingBusinessException;
 import com.fabrick.test.transaction.manager.api.exception.GbsBankingApiException;
 import com.fabrick.test.transaction.manager.api.exception.InternalApplicationException;
-import com.fabrick.test.transaction.manager.api.utils.GbsBankingPaymentsErrorCodeMapper;
+import com.fabrick.test.transaction.manager.api.utils.GbsBankingErrorCodeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,30 +19,16 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class BalanceService {
 
-    private final GbsBankingClient fabrickClient;
+    private final GbsBankingClient gbsBankingClient;
 
     public Balance getAccountBalance(String accountId) {
         log.info("Requesting balance for accountId: {}", accountId);
 
         try {
-            GbsBankingResponse<Balance> apiResponse = fabrickClient.retrieveAccountBalance(accountId);
-
-            // Il GbsBankingFeignErrorDecoder gestisce già tutti gli status HTTP 4xx/5xx lanciando eccezioni.
-            if (GbsBankingStatus.OK.equals(apiResponse.getStatus())) {
-                log.debug("Balance successfully received for accountId: {}. Balance: {}", accountId, apiResponse.getPayload().getBalance());
-                return apiResponse.getPayload();
-            } else {
-                log.warn("GbsBanking API returned KO status for balance check with HTTP 200. AccountId: {}. Errors: {}", accountId, apiResponse.getErrors());
-                throw new GbsBankingBusinessException(apiResponse.getErrors(),
-                        apiResponse.getErrors().stream()
-                                .map(error -> GbsBankingPaymentsErrorCodeMapper.resolveInternalErrorCode(error, HttpStatus.OK))
-                                .toList());
-            }
-        } catch (GbsBankingBusinessException e) {
-            log.warn("GbsBanking API business validation error during balance retrieval for account {}: {}", accountId, e.getMessage(), e);
-            throw e;
-        } catch (GbsBankingApiException e) {
-            log.error("GbsBanking API HTTP error during balance retrieval for account {}: {}", accountId, e.getMessage());
+            GbsBankingResponse<Balance> apiResponse = gbsBankingClient.retrieveAccountBalance(accountId);
+            return handleGbsBankingResponse(accountId, apiResponse);
+        } catch (GbsBankingBusinessException | GbsBankingApiException e) {
+            log.error("GbsBanking API error during balance retrieval for account {}: {}", accountId, e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             log.error("An unexpected error occurred while fetching balance for account {}: {}", accountId, e.getMessage(), e);
@@ -52,5 +38,24 @@ public class BalanceService {
                     ErrorCode.UNEXPECTED_ERROR
             );
         }
+    }
+
+    private Balance handleGbsBankingResponse(String accountId, GbsBankingResponse<Balance> response) {
+        if (GbsBankingStatus.OK.equals(response.getStatus())) {
+            log.info("Balance successfully retrieved for account ID: {}. Balance: {}", accountId, response.getPayload().getBalance());
+            return response.getPayload();
+        }
+
+        // Usa GbsBankingStatus.KO per il confronto
+        if (GbsBankingStatus.KO.equals(response.getStatus())) {
+            log.error("GbsBanking API returned KO status with HTTP 200 for balance retrieval for account ID: {}. Errors: {}", accountId, response.getErrors());
+            throw new GbsBankingBusinessException(response.getErrors(),
+                    response.getErrors().stream()
+                            .map(error -> GbsBankingErrorCodeMapper.resolveInternalErrorCode(error, HttpStatus.OK))
+                            .toList());
+        }
+
+        // Questo caso non dovrebbe mai accadere se GbsBankingStatus copre tutti i casi.
+        throw new InternalApplicationException("Unexpected status received from GbsBanking API", ErrorCode.UNEXPECTED_ERROR);
     }
 }

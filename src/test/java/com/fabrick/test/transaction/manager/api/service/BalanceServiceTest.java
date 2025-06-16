@@ -53,7 +53,7 @@ class BalanceServiceTest {
         Mockito.when(gbsBankingClient.retrieveAccountBalance(Mockito.any()))
                 .thenReturn(gbsBankingResponse);
 
-        Mockito.when(gbsBankingResponse.getStatus()).thenReturn(GbsBankingStatus.PENDING);
+        Mockito.when(gbsBankingResponse.getStatus()).thenReturn(GbsBankingStatus.KO);
         Balance balance = new Balance();
         Mockito.when(gbsBankingResponse.getErrors()).thenReturn(
                 List.of(

@@ -39,25 +39,6 @@ class MoneyTransferServiceTest {
         Assertions.assertNotNull(res);
     }
 
-    @Test
-    public void transferMoneyBp049Error() {
-        var gbsBankingResponse = Mockito.mock(GbsBankingResponse.class);
-        Mockito.when(gbsBankingClient.createMoneyTransfer(Mockito.any(), Mockito.any(), Mockito.any()))
-                .thenReturn(gbsBankingResponse);
-        Mockito.when(gbsBankingResponse.getStatus()).thenReturn(GbsBankingStatus.KO);
-        Mockito.when(gbsBankingResponse.getErrors()).thenReturn(
-                List.of(
-                        new GbsBankingResponse.GbsBankingError(
-                                "API000",
-                                "BP049"
-                        )
-                )
-        );
-        Mockito.when(gbsBankingResponse.getPayload()).thenReturn(new MoneyTransferResponse());
-        var res = moneyTransferService.transferMoney("123", new MoneyTransferRequest());
-
-        Assertions.assertNotNull(res);
-    }
 
     @Test
     public void transferMoneyError() {

@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.stream.Stream;
 
-class GbsBankingPaymentsErrorCodeMapperTest {
+class GbsBankingErrorCodeMapperTest {
 
     @ParameterizedTest
     @MethodSource("testScenario")
@@ -21,7 +21,7 @@ class GbsBankingPaymentsErrorCodeMapperTest {
     ) {
         Assertions.assertEquals(
                 expectedErrorCode,
-                GbsBankingPaymentsErrorCodeMapper.resolveInternalErrorCode(
+                GbsBankingErrorCodeMapper.resolveInternalErrorCode(
                         error,
                         httpStatus
                 ));
