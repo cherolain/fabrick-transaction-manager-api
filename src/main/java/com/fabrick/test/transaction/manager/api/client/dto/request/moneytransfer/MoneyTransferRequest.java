@@ -19,24 +19,25 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class MoneyTransferRequest {
 
-    @NotNull
+    @NotNull(message = "creditor must not be null")
     @Valid
     private CreditorRequest creditor;
 
+    @NotNull(message = "executionDate must not be null")
     @FutureOrPresent(message = "executionDate must be today or in the future")
     private LocalDate executionDate;
 
     private String uri;
 
-    @NotBlank
+    @NotBlank(message = "description must not be blank")
     @Size(max = 140)
     private String description;
 
-    @NotNull
+    @NotNull(message = "amount must not be null")
     @DecimalMin(value = "0.01", message = "amount must be positive")
     private BigDecimal amount;
 
-    @NotBlank
+    @NotBlank(message = "currency must not be blank")
     @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a valid 3-letter ISO code")
     private String currency;
 

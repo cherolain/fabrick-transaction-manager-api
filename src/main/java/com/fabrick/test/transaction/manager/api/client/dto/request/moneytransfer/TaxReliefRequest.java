@@ -17,13 +17,13 @@ public class TaxReliefRequest {
     @Pattern(regexp = "119R|DL50|L296|L449|L234")
     private String taxReliefId;
 
-    @NotNull
+    @NotNull(message = "isCondoUpgrade must not be null")
     private Boolean isCondoUpgrade;
 
-    @NotBlank
+    @NotBlank(message = "creditorFiscalCode must not be blank")
     private String creditorFiscalCode;
 
-    @NotNull
+    @NotNull(message = "beneficiaryType must not be null")
     @Pattern(regexp = "NATURAL_PERSON|LEGAL_PERSON",  message = "beneficiaryType must be NATURAL_PERSON or LEGAL_PERSON")
     private String beneficiaryType;
 

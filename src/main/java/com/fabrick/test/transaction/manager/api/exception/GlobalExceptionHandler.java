@@ -1,5 +1,6 @@
 package com.fabrick.test.transaction.manager.api.exception;
 
+import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
 import com.fabrick.test.transaction.manager.api.model.TransactionManagerApiResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +17,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    // ---
-    // Handler per GbsBankingApiException
-    // Gestisce errori di comunicazione HTTP (es. 400, 401, 403, 404, 500, 503) direttamente da GbsBanking,
-    // come tradotti dal GbsBankingFeignErrorDecoder.
-    // ---
+
     @ExceptionHandler(GbsBankingApiException.class)
     public ResponseEntity<TransactionManagerApiResponse<?>> handleGbsBankingApiException(GbsBankingApiException ex) {
-        // ex.getMessage() contiene il messaggio dettagliato costruito nel GbsBankingFeignErrorDecoder
-        // (es. "GbsBanking API returned an error: Unauthorized. Details: Credenziali API non valide o scadute")
         log.error("GbsBanking API HTTP error: {}. Status: {}. ErrorCode: {}", ex.getMessage(), ex.getHttpStatus(), ex.getErrorCode(), ex);
 
         return ResponseEntity.status(ex.getHttpStatus() != null ? ex.getHttpStatus() : HttpStatus.INTERNAL_SERVER_ERROR).body(
@@ -38,20 +33,10 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // ---
-    // Handler per GbsBankingApiBusinessException
-    // Gestisce errori di business da GbsBanking (es. validazione input, come IBAN/CF non validi, ecc.),
-    // anche se GbsBanking li ha restituiti con HTTP 200 ma con status "KO" interno,
-    // o con HTTP 400 e payload di errore.
-    // ---
     @ExceptionHandler(GbsBankingBusinessException.class)
     public ResponseEntity<TransactionManagerApiResponse<?>> handleGbsBankingApiBusinessException(GbsBankingBusinessException ex) {
-        // ex.getMessage() contiene il messaggio dettagliato costruito nel GbsBankingFeignErrorDecoder
-        // (es. "GbsBanking input validation error: Codice fiscale ordinante formalmente non valido")
         log.warn("GbsBanking business error: '{}'. Details: {}", ex.getMessage(), ex.getErrors(), ex);
 
-        // Il messaggio per il client sarà proprio ex.getMessage()
-        // Il codice interno sarà ex.getErrorCode().getCode()
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new TransactionManagerApiResponse<>(
                         null,
@@ -60,9 +45,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // ---
-    // Handler per MethodArgumentNotValidException (Errori di validazione @Valid nei DTO di richiesta)
-    // ---
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<TransactionManagerApiResponse<?>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         String validationDetails = ex.getBindingResult().getAllErrors().stream()
@@ -88,9 +70,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // ---
-    // Handler per ConstraintViolationException (Errori di validazione @Validated su parametri/variabili di path)
-    // ---
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<TransactionManagerApiResponse<?>> handleConstraintViolation(ConstraintViolationException ex) {
         String constraintDetails = ex.getConstraintViolations().stream()
@@ -110,9 +90,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // ---
-    // Handler catch-all per tutte le altre eccezioni non gestite esplicitamente.
-    // ---
     @ExceptionHandler(Exception.class)
     public ResponseEntity<TransactionManagerApiResponse<?>> handleGenericException(Exception ex) {
         log.error("An unhandled exception occurred: {}", ex.getMessage(), ex);
@@ -127,12 +104,17 @@ public class GlobalExceptionHandler {
         );
     }
 
+
     private static List<TransactionManagerApiResponse.TransactionManagerError> getTransactionManagerErrors(GbsBankingBusinessException ex) {
-        return ex.getErrorCodes().stream().map(
-                errorcode -> new TransactionManagerApiResponse.TransactionManagerError(
-                        errorcode.getCode(),
-                        errorcode.getDefaultMessage()
-                )
-        ).collect(Collectors.toList());
+        List<GbsBankingResponse.GbsBankingError> apiErrors = ex.getErrors();
+        List<ErrorCode> errorCodes = ex.getErrorCodes();
+        return java.util.stream.IntStream.range(0, errorCodes.size())
+                .mapToObj(i -> new TransactionManagerApiResponse.TransactionManagerError(
+                        errorCodes.get(i).getCode(),
+                        apiErrors != null && apiErrors.size() > i
+                                ? java.util.Objects.requireNonNullElse(apiErrors.get(i).getDescription(), errorCodes.get(i).getDefaultMessage())
+                                : errorCodes.get(i).getDefaultMessage()
+                ))
+                .toList();
     }
 }

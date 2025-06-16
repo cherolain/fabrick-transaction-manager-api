@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreditorAccountRequest {
-    @NotBlank
+    @NotBlank(message = "accountCode must not be blank")
     private String accountCode;
 
     private String bicCode;
