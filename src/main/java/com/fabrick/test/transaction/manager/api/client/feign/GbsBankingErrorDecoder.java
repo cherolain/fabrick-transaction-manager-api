@@ -1,4 +1,4 @@
-package com.fabrick.test.transaction.manager.api.configuration;
+package com.fabrick.test.transaction.manager.api.client.feign;
 
 import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
 import com.fabrick.test.transaction.manager.api.exception.ErrorCode;
