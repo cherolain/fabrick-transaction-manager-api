@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreditorRequest {
-    @Size(max = 70)
-    @NotBlank
+    @Size(max = 70, message = "name must not exceed 70 characters")
+    @NotBlank(message = "name must not be blank")
     private String name;
 
-    @NotNull
+    @NotNull(message = "type must not be null")
     @Valid
     private CreditorAccountRequest account;
 

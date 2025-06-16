@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NaturalPersonBeneficiaryRequest { // Da NaturalPersonBeneficiaryRequestDto a NaturalPersonBeneficiaryRequest
-    @NotBlank
+    @NotBlank(message = "fiscalCode1 must not be blank")
     private String fiscalCode1;
     private String fiscalCode2;
     private String fiscalCode3;

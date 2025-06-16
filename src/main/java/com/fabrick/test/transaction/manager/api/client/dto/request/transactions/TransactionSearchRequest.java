@@ -14,11 +14,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class TransactionSearchRequest {
 
-    @NotNull
+    @NotNull(message = "fromAccountingDate must not be null")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate fromAccountingDate;
 
-    @NotNull
+    @NotNull(message = "toAccountingDate must not be null")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate toAccountingDate;
 }

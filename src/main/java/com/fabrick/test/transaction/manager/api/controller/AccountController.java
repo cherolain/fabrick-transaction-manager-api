@@ -65,7 +65,7 @@ public class AccountController {
             @NotEmpty(message = "Account ID cannot be empty.")
             @Pattern(regexp = "^[0-9]+$", message = "Account ID must contain only digits.")
             String accountId,
-            @RequestBody MoneyTransferRequest moneyTransferRequest,
+            @Valid @RequestBody MoneyTransferRequest moneyTransferRequest,
             @RequestHeader("Authorization") String authHeader
     ) {
         MoneyTransferResponse response = accountApplicationService.transferMoney(accountId, moneyTransferRequest);
