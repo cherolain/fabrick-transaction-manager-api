@@ -26,7 +26,7 @@ public class GbsBankingErrorDecoder implements ErrorDecoder {
     public Exception decode(String methodKey, Response response) {
         HttpStatus httpStatus = HttpStatus.valueOf(response.status());
         List<GbsBankingResponse.GbsBankingError> gbsBankingErrors = Collections.emptyList();
-
+        log.error("GbsBanking API HTTP error for methodKey: {}. Status: {}", methodKey, httpStatus);
         try (InputStream body = response.body() != null ? response.body().asInputStream() : null) {
             if (body != null && body.available() > 0) {
                 GbsBankingResponse<?> apiResponse = objectMapper.readValue(body, GbsBankingResponse.class);

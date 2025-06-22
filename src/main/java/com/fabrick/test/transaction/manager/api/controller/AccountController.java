@@ -6,7 +6,7 @@ import com.fabrick.test.transaction.manager.api.client.dto.response.balance.Bala
 import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferResponse;
 import com.fabrick.test.transaction.manager.api.client.dto.response.transactions.TransactionListResponse;
 import com.fabrick.test.transaction.manager.api.model.TransactionManagerApiResponse;
-import com.fabrick.test.transaction.manager.api.service.AccountApplicationService;
+import com.fabrick.test.transaction.manager.api.service.GbsBankingApiFacade;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -29,7 +29,7 @@ import java.util.Collections;
 @Validated
 public class AccountController {
 
-    private final AccountApplicationService accountApplicationService;
+    private final GbsBankingApiFacade gbsBankingApiFacade;
 
     /**
      * GET /api/v1/accounts/{accountId}/balance
@@ -46,7 +46,7 @@ public class AccountController {
             String accountId,
             @RequestHeader("Authorization") String authHeader
     ) {
-        Balance response = accountApplicationService.getBalance(accountId);
+        Balance response = gbsBankingApiFacade.getBalance(accountId);
         return buildSuccessResponse(response);
     }
 
@@ -68,7 +68,7 @@ public class AccountController {
             @Valid @RequestBody MoneyTransferRequest moneyTransferRequest,
             @RequestHeader("Authorization") String authHeader
     ) {
-        MoneyTransferResponse response = accountApplicationService.transferMoney(accountId, moneyTransferRequest);
+        MoneyTransferResponse response = gbsBankingApiFacade.transferMoney(accountId, moneyTransferRequest);
         return buildSuccessResponse(response);
     }
 
@@ -91,7 +91,7 @@ public class AccountController {
             @Valid TransactionSearchRequest searchRequest, // @Valid per attivare le validazioni nel DTO
             @RequestHeader("Authorization") String authHeader
     ) {
-        TransactionListResponse transactions = accountApplicationService.getTransactions(accountId, searchRequest);
+        TransactionListResponse transactions = gbsBankingApiFacade.getTransactions(accountId, searchRequest);
         return buildSuccessResponse(transactions);
     }
 
