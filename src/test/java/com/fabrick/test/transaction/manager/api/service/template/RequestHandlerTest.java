@@ -37,7 +37,7 @@ class RequestHandlerTest {
 
         @Override
         protected String mapToResponse(String payload) {
-            return payload; // Simple identity mapping for the test
+            return payload;
         }
     }
 
@@ -48,7 +48,6 @@ class RequestHandlerTest {
 
     @Test
     void handle_whenApiReturnsOk_shouldSucceed() {
-        // This test remains separate as it's the "happy path".
         var successResponse = new GbsBankingResponse<String>();
         successResponse.setStatus(GbsBankingStatus.OK);
         successResponse.setPayload("SuccessPayload");

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class MoneyTransferCommandHandler extends RequestHandler<MoneyTransferCommandHandler.Command, MoneyTransferResponse, MoneyTransferResponse> {
 
     /**

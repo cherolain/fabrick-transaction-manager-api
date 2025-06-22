@@ -34,14 +34,11 @@ class MoneyTransferCommandHandlerTest {
 
     @Test
     public void handle_whenApiReturnsOk_shouldReturnPayload() {
-        // --- ARRANGE ---
 
-        // 1. Definiamo l'input per il nostro handler
         String accountId = "12345";
         var moneyTransferRequest = new MoneyTransferRequest();
         var command = new MoneyTransferCommandHandler.Command(accountId, moneyTransferRequest, TimeZone.getDefault().getID());
 
-        // 2. Mock della risposta dell'API esterna
         var expectedPayload = new MoneyTransferResponse();
         var gbsBankingResponse = new GbsBankingResponse<MoneyTransferResponse>();
         gbsBankingResponse.setStatus(GbsBankingStatus.OK);

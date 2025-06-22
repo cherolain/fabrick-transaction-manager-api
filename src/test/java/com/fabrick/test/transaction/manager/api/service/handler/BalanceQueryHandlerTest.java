@@ -31,10 +31,8 @@ class BalanceQueryHandlerTest {
 
     @Test
     void handle_whenApiReturnsOk_shouldCallClientAndReturnPayload() {
-        // --- ARRANGE ---
         String accountId = "123";
 
-        // Prepare a realistic payload and the API response envelope
         var expectedPayload = new Balance();
         expectedPayload.setBalance(new BigDecimal("100.50"));
 
@@ -42,19 +40,14 @@ class BalanceQueryHandlerTest {
         apiResponse.setStatus(GbsBankingStatus.OK);
         apiResponse.setPayload(expectedPayload);
 
-        // Configure the mock client
         when(gbsBankingClient.retrieveAccountBalance(accountId)).thenReturn(apiResponse);
 
-        // --- ACT ---
         Balance result = balanceQueryHandler.handle(accountId);
 
-        // --- ASSERT ---
-        // Verify the result is correct
         assertNotNull(result);
         assertEquals(expectedPayload, result);
         assertEquals(new BigDecimal("100.50"), result.getBalance());
 
-        // Verify the interaction with the mock
         verify(gbsBankingClient).retrieveAccountBalance(accountId);
     }
 }

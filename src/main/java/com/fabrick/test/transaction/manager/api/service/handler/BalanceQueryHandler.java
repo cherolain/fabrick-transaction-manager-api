@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class BalanceQueryHandler extends RequestHandler<String, Balance, Balance> {
 
     private final GbsBankingClient client;
