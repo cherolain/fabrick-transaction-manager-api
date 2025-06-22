@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GbsBankingApiFacadeTest {
 
-    // @Mock crea i mock per le dipendenze della Facade.
     @Mock
     private BalanceQueryHandler balanceQueryHandler;
     @Mock
@@ -40,15 +39,12 @@ class GbsBankingApiFacadeTest {
 
     @Test
     void getAccountBalance_shouldDelegateToBalanceQueryHandler() {
-        // --- ARRANGE ---
         String accountId = "123";
         var expectedBalance = new Balance();
 
         when(balanceQueryHandler.handle(accountId)).thenReturn(expectedBalance);
 
-        // --- ACT ---
         Balance result = fabrickApiFacade.getBalance(accountId);
-
 
         assertNotNull(result);
         assertEquals(expectedBalance, result);
@@ -58,27 +54,20 @@ class GbsBankingApiFacadeTest {
 
     @Test
     void getTransactions_shouldBuildQueryAndDelegateToTransactionsQueryHandler() {
-        // --- ARRANGE ---
         String accountId = "456";
         var searchRequest = new TransactionSearchRequest(LocalDate.now(), LocalDate.now().plusDays(1));
         var expectedResponse = new TransactionListResponse();
 
-        // Usiamo un ArgumentCaptor per "catturare" l'oggetto Query che viene passato all'handler
         ArgumentCaptor<TransactionsQueryHandler.Query> queryCaptor = ArgumentCaptor.forClass(TransactionsQueryHandler.Query.class);
 
-        // Configuriamo il mock dell'handler
         when(transactionsQueryHandler.handle(any(TransactionsQueryHandler.Query.class))).thenReturn(expectedResponse);
 
-        // --- ACT ---
         TransactionListResponse result = fabrickApiFacade.getTransactions(accountId, searchRequest);
 
-        // --- ASSERT ---
         assertEquals(expectedResponse, result);
 
-        // Verifichiamo che l'handler sia stato chiamato, e catturiamo l'argomento
         verify(transactionsQueryHandler).handle(queryCaptor.capture());
 
-        // Ora verifichiamo che i dati nell'oggetto Query catturato siano corretti
         TransactionsQueryHandler.Query capturedQuery = queryCaptor.getValue();
         assertEquals(accountId, capturedQuery.accountId());
         assertEquals(searchRequest, capturedQuery.searchRequest());
@@ -86,7 +75,6 @@ class GbsBankingApiFacadeTest {
 
     @Test
     void transferMoney_shouldBuildCommandAndDelegateToMoneyTransferCommandHandler() {
-        // --- ARRANGE ---
         String accountId = "789";
         var moneyTransferRequest = new MoneyTransferRequest();
         var expectedResponse = new MoneyTransferResponse();
@@ -95,10 +83,8 @@ class GbsBankingApiFacadeTest {
 
         when(moneyTransferCommandHandler.handle(any(MoneyTransferCommandHandler.Command.class))).thenReturn(expectedResponse);
 
-        // --- ACT ---
         MoneyTransferResponse result = fabrickApiFacade.transferMoney(accountId, moneyTransferRequest);
 
-        // --- ASSERT ---
         assertEquals(expectedResponse, result);
 
         verify(moneyTransferCommandHandler).handle(commandCaptor.capture());
