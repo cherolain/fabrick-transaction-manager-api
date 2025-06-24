@@ -8,18 +8,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Custom validation annotation for TaxReliefRequest.
- * Ensures consistency between 'beneficiaryType' and the presence/absence
- * of 'naturalPersonBeneficiary' and 'legalPersonBeneficiary' fields.
- * This annotation is applied at the class level of TaxReliefRequest.
+ * Custom validation annotation to be applied on a MoneyTransferRequest.
+ * It ensures that 'executionDate' is present if 'isInstant' is false.
  */
-@Constraint(validatedBy = TaxReliefValidator.class)
+@Constraint(validatedBy = ExecutionDateValidator.class)
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidTaxRelief {
-    String message() default "{taxrelief.beneficiarytype.mismatch}";
-
+public @interface ValidExecutionDate {
+    String message() default "{moneytransfer.executiondate.required.for.noninstant}";
     Class<?>[] groups() default {};
-
     Class<? extends Payload>[] payload() default {};
 }

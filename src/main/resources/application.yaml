@@ -4,11 +4,6 @@ server:
 spring:
   application:
     name: transaction-manager-api
-  datasource:
-    url: jdbc:h2:mem:fabrikdb;DB_CLOSE_DELAY=-1
-    driverClassName: org.h2.Driver
-    username: sa
-    password: password
   docker:
     compose:
       enabled: false
@@ -28,14 +23,3 @@ spring:
             defaultRequestHeaders:
               Auth-Schema: S2S
               Api-Key: FXOVVXXHVCPVPBZXIJOBGUGSKHDNFRRQJP # ${FABRICK_API_KEY} should be stored as secret
-
-  security:
-    csrf:
-      ignoring-request-matchers:
-        - ant_request_matcher_factory_#getMatcher('/h2-console/**')
-  headers:
-    frame-options: sameorigin
-
-logging:
-  level:
-    com.example.fabrik: DEBUG

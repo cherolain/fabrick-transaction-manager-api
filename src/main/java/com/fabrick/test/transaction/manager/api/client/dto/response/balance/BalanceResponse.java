@@ -2,6 +2,7 @@ package com.fabrick.test.transaction.manager.api.client.dto.response.balance;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
@@ -13,8 +14,9 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Balance {
+public class BalanceResponse {
 
     /**
      * Date of the balance.
