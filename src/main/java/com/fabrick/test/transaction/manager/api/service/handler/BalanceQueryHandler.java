@@ -2,25 +2,27 @@ package com.fabrick.test.transaction.manager.api.service.handler;
 
 import com.fabrick.test.transaction.manager.api.client.GbsBankingClient;
 import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
-import com.fabrick.test.transaction.manager.api.client.dto.response.balance.Balance;
+import com.fabrick.test.transaction.manager.api.client.dto.response.balance.BalanceResponse;
+import com.fabrick.test.transaction.manager.api.dto.balance.BalanceApiResponse;
+import com.fabrick.test.transaction.manager.api.mapper.BalanceMapper;
 import com.fabrick.test.transaction.manager.api.service.template.RequestHandler;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class BalanceQueryHandler extends RequestHandler<String, Balance, Balance> {
+public class BalanceQueryHandler extends RequestHandler<String, BalanceResponse, BalanceApiResponse> {
 
     private final GbsBankingClient client;
+    private final BalanceMapper balanceMapper;
 
     @Override
-    protected GbsBankingResponse<Balance> performAction(String accountId) {
+    protected GbsBankingResponse<BalanceResponse> performAction(String accountId) {
         return client.retrieveAccountBalance(accountId);
     }
 
     @Override
-    protected Balance mapToResponse(Balance payload) {
-        return payload;
+    protected BalanceApiResponse mapToResponse(BalanceResponse payload) {
+        return balanceMapper.toBalanceApiResponse(payload);
     }
 }

@@ -1,5 +1,6 @@
 package com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer;
 
+import com.fabrick.test.transaction.manager.api.validation.ValidCreditorAddress;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ValidCreditorAddress
 public class CreditorRequest {
     @Size(max = 70, message = "name must not exceed 70 characters")
     @NotBlank(message = "name must not be blank")

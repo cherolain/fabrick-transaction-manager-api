@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreditorAddressRequest { // Da CreditorAddressRequestDto a CreditorAddressRequest
+public class CreditorAddressRequest {
     @Size(max = 40, message = "address must not exceed 40 characters")
     private String address;
 

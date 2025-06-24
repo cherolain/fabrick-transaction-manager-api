@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
                     if (error instanceof FieldError fieldError) {
                         return fieldError.getField() + ": " + fieldError.getDefaultMessage();
                     }
-                    return error.getObjectName() + ": " + error.getDefaultMessage();
+                    return error.getDefaultMessage();
                 })
                 .collect(Collectors.joining("; "));
 

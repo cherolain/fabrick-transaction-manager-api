@@ -2,9 +2,12 @@ package com.fabrick.test.transaction.manager.api.controller;
 
 import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.MoneyTransferRequest;
 import com.fabrick.test.transaction.manager.api.client.dto.request.transactions.TransactionSearchRequest;
-import com.fabrick.test.transaction.manager.api.client.dto.response.balance.Balance;
-import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferResponse;
+import com.fabrick.test.transaction.manager.api.client.dto.response.balance.BalanceResponse;
+import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferGbsResponse;
 import com.fabrick.test.transaction.manager.api.client.dto.response.transactions.TransactionListResponse;
+import com.fabrick.test.transaction.manager.api.dto.balance.BalanceApiResponse;
+import com.fabrick.test.transaction.manager.api.dto.moneytransfer.MoneyTransferApiResponse;
+import com.fabrick.test.transaction.manager.api.dto.transactions.TransactionListApiResponse;
 import com.fabrick.test.transaction.manager.api.model.TransactionManagerApiResponse;
 import com.fabrick.test.transaction.manager.api.service.GbsBankingApiFacade;
 import jakarta.validation.Valid;
@@ -36,17 +39,17 @@ public class AccountController {
      * Retrieves the balance for a specific account.
      *
      * @param accountId The ID of the account, passed as a path variable.
-     * @return A {@link ResponseEntity} containing the {@link Balance} and an HTTP status code.
+     * @return A {@link ResponseEntity} containing the {@link BalanceResponse} and an HTTP status code.
      */
     @GetMapping("/{accountId}/balance")
-    public ResponseEntity<TransactionManagerApiResponse<Balance>> getBalance(
+    public ResponseEntity<TransactionManagerApiResponse<BalanceApiResponse>> getBalance(
             @PathVariable
             @NotEmpty(message = "Account ID cannot be empty.")
             @Pattern(regexp = "^[0-9]+$", message = "Account ID must contain only digits.")
             String accountId,
             @RequestHeader("Authorization") String authHeader
     ) {
-        Balance response = gbsBankingApiFacade.getBalance(accountId);
+        BalanceApiResponse response = gbsBankingApiFacade.getBalance(accountId);
         return buildSuccessResponse(response);
     }
 
@@ -56,11 +59,11 @@ public class AccountController {
      *
      * @param accountId            The ID of the account, passed as a path variable.
      * @param moneyTransferRequest The request body containing the details of the money transfer.
-     * @return A {@link ResponseEntity} containing the {@link MoneyTransferResponse} and an HTTP status code.
+     * @return A {@link ResponseEntity} containing the {@link MoneyTransferGbsResponse} and an HTTP status code.
      */
 
     @PostMapping("/{accountId}/money-transfer")
-    public ResponseEntity<TransactionManagerApiResponse<MoneyTransferResponse>> transferMoney(
+    public ResponseEntity<TransactionManagerApiResponse<MoneyTransferApiResponse>> transferMoney(
             @PathVariable
             @NotEmpty(message = "Account ID cannot be empty.")
             @Pattern(regexp = "^[0-9]+$", message = "Account ID must contain only digits.")
@@ -68,7 +71,7 @@ public class AccountController {
             @Valid @RequestBody MoneyTransferRequest moneyTransferRequest,
             @RequestHeader("Authorization") String authHeader
     ) {
-        MoneyTransferResponse response = gbsBankingApiFacade.transferMoney(accountId, moneyTransferRequest);
+        MoneyTransferApiResponse response = gbsBankingApiFacade.transferMoney(accountId, moneyTransferRequest);
         return buildSuccessResponse(response);
     }
 
@@ -83,7 +86,7 @@ public class AccountController {
      * @return A {@link ResponseEntity} containing the {@link TransactionListResponse} and an HTTP status code.
      */
     @GetMapping("/{accountId}/transactions")
-    public ResponseEntity<TransactionManagerApiResponse<TransactionListResponse>> getTransactions(
+    public ResponseEntity<TransactionManagerApiResponse<TransactionListApiResponse>> getTransactions(
             @PathVariable
             @NotEmpty(message = "Account ID cannot be empty.")
             @Pattern(regexp = "^[0-9]+$", message = "Account ID must contain only digits.")
@@ -91,7 +94,7 @@ public class AccountController {
             @Valid TransactionSearchRequest searchRequest, // @Valid per attivare le validazioni nel DTO
             @RequestHeader("Authorization") String authHeader
     ) {
-        TransactionListResponse transactions = gbsBankingApiFacade.getTransactions(accountId, searchRequest);
+        TransactionListApiResponse transactions = gbsBankingApiFacade.getTransactions(accountId, searchRequest);
         return buildSuccessResponse(transactions);
     }
 

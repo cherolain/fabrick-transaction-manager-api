@@ -4,8 +4,10 @@ import com.fabrick.test.transaction.manager.api.client.GbsBankingClient;
 import com.fabrick.test.transaction.manager.api.client.dto.GbsBankingStatus;
 import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.MoneyTransferRequest;
 import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
-import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferResponse;
+import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferGbsResponse;
 import com.fabrick.test.transaction.manager.api.exception.GbsBankingBusinessException;
+import com.fabrick.test.transaction.manager.api.mapper.MoneyTransferMapper;
+import com.fabrick.test.transaction.manager.api.dto.moneytransfer.MoneyTransferApiResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,12 +26,14 @@ class MoneyTransferCommandHandlerTest {
 
     @Mock
     private GbsBankingClient gbsBankingClient;
+    @Mock
+    private MoneyTransferMapper moneyTransferMapper;
 
     private MoneyTransferCommandHandler moneyTransferCommandHandler;
 
     @BeforeEach
     public void setUp() {
-        moneyTransferCommandHandler = new MoneyTransferCommandHandler(gbsBankingClient);
+        moneyTransferCommandHandler = new MoneyTransferCommandHandler(moneyTransferMapper, gbsBankingClient);
     }
 
     @Test
@@ -39,19 +43,21 @@ class MoneyTransferCommandHandlerTest {
         var moneyTransferRequest = new MoneyTransferRequest();
         var command = new MoneyTransferCommandHandler.Command(accountId, moneyTransferRequest, TimeZone.getDefault().getID());
 
-        var expectedPayload = new MoneyTransferResponse();
-        var gbsBankingResponse = new GbsBankingResponse<MoneyTransferResponse>();
+        var expectedPayload = new MoneyTransferGbsResponse();
+        var gbsBankingResponse = new GbsBankingResponse<MoneyTransferGbsResponse>();
         gbsBankingResponse.setStatus(GbsBankingStatus.OK);
         gbsBankingResponse.setPayload(expectedPayload);
 
         when(gbsBankingClient.createMoneyTransfer(any(), any(), any())).thenReturn(gbsBankingResponse);
 
+        var expectedApiResponse = new MoneyTransferApiResponse();
+        when(moneyTransferMapper.toMoneyTransferApiResponse(expectedPayload)).thenReturn(expectedApiResponse);
 
-        MoneyTransferResponse actualResponse = moneyTransferCommandHandler.handle(command);
-
+        // Esegui il test
+        MoneyTransferApiResponse actualResponse = moneyTransferCommandHandler.handle(command);
 
         assertNotNull(actualResponse);
-        assertEquals(expectedPayload, actualResponse);
+        assertEquals(expectedApiResponse, actualResponse);
     }
 
     @Test
@@ -59,7 +65,7 @@ class MoneyTransferCommandHandlerTest {
 
         var command = new MoneyTransferCommandHandler.Command("12345", new MoneyTransferRequest(), TimeZone.getDefault().getID());
 
-        var gbsBankingResponse = new GbsBankingResponse<MoneyTransferResponse>();
+        var gbsBankingResponse = new GbsBankingResponse<MoneyTransferGbsResponse>();
         gbsBankingResponse.setStatus(GbsBankingStatus.KO);
         gbsBankingResponse.setErrors(List.of(new GbsBankingResponse.GbsBankingError("API001", "Some error")));
 

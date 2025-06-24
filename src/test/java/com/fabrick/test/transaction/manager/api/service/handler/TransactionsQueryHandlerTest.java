@@ -5,6 +5,8 @@ import com.fabrick.test.transaction.manager.api.client.dto.GbsBankingStatus;
 import com.fabrick.test.transaction.manager.api.client.dto.request.transactions.TransactionSearchRequest;
 import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
 import com.fabrick.test.transaction.manager.api.client.dto.response.transactions.TransactionListResponse;
+import com.fabrick.test.transaction.manager.api.dto.transactions.TransactionListApiResponse;
+import com.fabrick.test.transaction.manager.api.mapper.TransactionMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,11 +27,14 @@ class TransactionsQueryHandlerTest {
     @Mock
     private GbsBankingClient gbsBankingClient;
 
+    @Mock
+    private TransactionMapper transactionMapper;
+
     private TransactionsQueryHandler transactionsQueryHandler;
 
     @BeforeEach
     void setUp() {
-        transactionsQueryHandler = new TransactionsQueryHandler(gbsBankingClient);
+        transactionsQueryHandler = new TransactionsQueryHandler(gbsBankingClient, transactionMapper);
     }
 
     @Test
@@ -48,11 +53,13 @@ class TransactionsQueryHandlerTest {
         apiResponse.setPayload(expectedPayload);
 
         when(gbsBankingClient.retrieveAccountTransactions(accountId, searchRequest)).thenReturn(apiResponse);
+        var expectedApiResponse = new TransactionListApiResponse();
+        when(transactionMapper.toTransactionApiResponse(expectedPayload)).thenReturn(expectedApiResponse);
 
-        TransactionListResponse result = transactionsQueryHandler.handle(query);
+        TransactionListApiResponse result = transactionsQueryHandler.handle(query);
 
         assertNotNull(result);
-        assertEquals(expectedPayload, result);
+        assertEquals(expectedApiResponse, result);
 
         verify(gbsBankingClient).retrieveAccountTransactions(accountId, searchRequest);
     }

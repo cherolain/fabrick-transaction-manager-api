@@ -1,5 +1,7 @@
 package com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer;
 
+import com.fabrick.test.transaction.manager.api.validation.ValidExecutionDate;
+import com.fabrick.test.transaction.manager.api.validation.ValidFeeType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.FutureOrPresent;
@@ -17,13 +19,14 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ValidExecutionDate // cross field intern validation
+@ValidFeeType
 public class MoneyTransferRequest {
 
     @NotNull(message = "creditor must not be null")
     @Valid
     private CreditorRequest creditor;
 
-    @NotNull(message = "executionDate must not be null")
     @FutureOrPresent(message = "executionDate must be today or in the future")
     private LocalDate executionDate;
 

@@ -7,7 +7,7 @@
                 <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</Pattern>
             </PatternLayout>
             <Policies>
-                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <TimeBasedTriggeringPolicy interval="10" modulate="true"/>
             </Policies>
         </RollingFile>
         <Console name="Console" target="SYSTEM_OUT">

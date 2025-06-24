@@ -2,9 +2,10 @@ package com.fabrick.test.transaction.manager.api.service;
 
 import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.MoneyTransferRequest;
 import com.fabrick.test.transaction.manager.api.client.dto.request.transactions.TransactionSearchRequest;
-import com.fabrick.test.transaction.manager.api.client.dto.response.balance.Balance;
-import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferResponse;
-import com.fabrick.test.transaction.manager.api.client.dto.response.transactions.TransactionListResponse;
+import com.fabrick.test.transaction.manager.api.client.dto.response.balance.BalanceResponse;
+import com.fabrick.test.transaction.manager.api.dto.balance.BalanceApiResponse;
+import com.fabrick.test.transaction.manager.api.dto.moneytransfer.MoneyTransferApiResponse;
+import com.fabrick.test.transaction.manager.api.dto.transactions.TransactionListApiResponse;
 import com.fabrick.test.transaction.manager.api.service.handler.BalanceQueryHandler;
 import com.fabrick.test.transaction.manager.api.service.handler.MoneyTransferCommandHandler;
 import com.fabrick.test.transaction.manager.api.service.handler.TransactionsQueryHandler;
@@ -23,7 +24,6 @@ import java.util.TimeZone;
 @RequiredArgsConstructor
 public class GbsBankingApiFacade {
 
-    // Dependencies are now on the specific, focused handlers.
     private final BalanceQueryHandler balanceQueryHandler;
     private final TransactionsQueryHandler transactionsQueryHandler;
     private final MoneyTransferCommandHandler moneyTransferCommandHandler;
@@ -35,7 +35,7 @@ public class GbsBankingApiFacade {
      * @param accountId The ID of the account.
      * @return The account Balance.
      */
-    public Balance getBalance(String accountId) {
+    public BalanceApiResponse getBalance(String accountId) {
         // The handler is called directly with the required primitive type. No new objects needed.
         return balanceQueryHandler.handle(accountId);
     }
@@ -48,7 +48,7 @@ public class GbsBankingApiFacade {
      * @param request   The DTO containing the search criteria (from/to dates).
      * @return A TransactionListResponse containing the list of transactions.
      */
-    public TransactionListResponse getTransactions(String accountId, TransactionSearchRequest request) {
+    public TransactionListApiResponse getTransactions(String accountId, TransactionSearchRequest request) {
         // Creates the nested record to pass all parameters to the handler.
         var query = new TransactionsQueryHandler.Query(accountId, request);
         return transactionsQueryHandler.handle(query);
@@ -62,7 +62,7 @@ public class GbsBankingApiFacade {
      * @param request   The DTO containing the money transfer details.
      * @return A MoneyTransferResponse confirming the operation.
      */
-    public MoneyTransferResponse transferMoney(String accountId, MoneyTransferRequest request) {
+    public MoneyTransferApiResponse transferMoney(String accountId, MoneyTransferRequest request) {
         // Creates the nested record to pass all necessary data to the handler.
         var command = new MoneyTransferCommandHandler.Command(
                 accountId,

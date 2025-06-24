@@ -1,6 +1,7 @@
 package com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MoneyTransferResponse {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class MoneyTransferGbsResponse {
     private String moneyTransferId;
     private String status;
     private String direction;

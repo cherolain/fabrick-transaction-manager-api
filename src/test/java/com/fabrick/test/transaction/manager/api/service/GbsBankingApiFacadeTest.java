@@ -2,9 +2,10 @@ package com.fabrick.test.transaction.manager.api.service;
 
 import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.MoneyTransferRequest;
 import com.fabrick.test.transaction.manager.api.client.dto.request.transactions.TransactionSearchRequest;
-import com.fabrick.test.transaction.manager.api.client.dto.response.balance.Balance;
-import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferResponse;
-import com.fabrick.test.transaction.manager.api.client.dto.response.transactions.TransactionListResponse;
+import com.fabrick.test.transaction.manager.api.dto.balance.BalanceApiResponse;
+import com.fabrick.test.transaction.manager.api.dto.moneytransfer.MoneyTransferApiResponse;
+import com.fabrick.test.transaction.manager.api.dto.transactions.TransactionApiResponse;
+import com.fabrick.test.transaction.manager.api.dto.transactions.TransactionListApiResponse;
 import com.fabrick.test.transaction.manager.api.service.handler.BalanceQueryHandler;
 import com.fabrick.test.transaction.manager.api.service.handler.MoneyTransferCommandHandler;
 import com.fabrick.test.transaction.manager.api.service.handler.TransactionsQueryHandler;
@@ -15,7 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,7 +26,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
+/**
+ * Unit tests for the GbsBankingApiFacade, verifying its orchestration logic.
+ */
 @ExtendWith(MockitoExtension.class)
 class GbsBankingApiFacadeTest {
 
@@ -35,20 +40,27 @@ class GbsBankingApiFacadeTest {
     private MoneyTransferCommandHandler moneyTransferCommandHandler;
 
     @InjectMocks
-    private GbsBankingApiFacade fabrickApiFacade;
+    private GbsBankingApiFacade gbsBankingApiFacade;
 
     @Test
-    void getAccountBalance_shouldDelegateToBalanceQueryHandler() {
+    void getBalance_shouldDelegateToBalanceQueryHandler() {
+        // --- ARRANGE ---
         String accountId = "123";
-        var expectedBalance = new Balance();
+        var expectedResponse = BalanceApiResponse.builder()
+                .date(LocalDate.now())
+                .balance(new BigDecimal(100))
+                .availableBalance(new BigDecimal(90))
+                .currency("EUR")
+                .build();
 
-        when(balanceQueryHandler.handle(accountId)).thenReturn(expectedBalance);
+        when(balanceQueryHandler.handle(accountId)).thenReturn(expectedResponse);
 
-        Balance result = fabrickApiFacade.getBalance(accountId);
+        // --- ACT ---
+        BalanceApiResponse result = gbsBankingApiFacade.getBalance(accountId);
 
+        // --- ASSERT ---
         assertNotNull(result);
-        assertEquals(expectedBalance, result);
-
+        assertEquals(expectedResponse, result);
         verify(balanceQueryHandler).handle(accountId);
     }
 
@@ -56,42 +68,51 @@ class GbsBankingApiFacadeTest {
     void getTransactions_shouldBuildQueryAndDelegateToTransactionsQueryHandler() {
         String accountId = "456";
         var searchRequest = new TransactionSearchRequest(LocalDate.now(), LocalDate.now().plusDays(1));
-        var expectedResponse = new TransactionListResponse();
+        var transaction = TransactionApiResponse.builder()
+                .amount(new BigDecimal("100.00"))
+                .currency("EUR")
+                .description("Test Transaction")
+                .accountingDate(LocalDate.now())
+                .valueDate(LocalDate.now())
+                .build();
+        var expected = TransactionListApiResponse.builder()
+                .list(Collections.singletonList(transaction))
+                .build();
 
-        ArgumentCaptor<TransactionsQueryHandler.Query> queryCaptor = ArgumentCaptor.forClass(TransactionsQueryHandler.Query.class);
+        when(transactionsQueryHandler.handle(any(TransactionsQueryHandler.Query.class))).thenReturn(expected);
 
-        when(transactionsQueryHandler.handle(any(TransactionsQueryHandler.Query.class))).thenReturn(expectedResponse);
+        var result = gbsBankingApiFacade.getTransactions(accountId, searchRequest);
 
-        TransactionListResponse result = fabrickApiFacade.getTransactions(accountId, searchRequest);
+        assertNotNull(result);
+        assertEquals(expected, result);
 
-        assertEquals(expectedResponse, result);
-
-        verify(transactionsQueryHandler).handle(queryCaptor.capture());
-
-        TransactionsQueryHandler.Query capturedQuery = queryCaptor.getValue();
-        assertEquals(accountId, capturedQuery.accountId());
-        assertEquals(searchRequest, capturedQuery.searchRequest());
+        ArgumentCaptor<TransactionsQueryHandler.Query> captor = ArgumentCaptor.forClass(TransactionsQueryHandler.Query.class);
+        verify(transactionsQueryHandler).handle(captor.capture());
+        assertEquals(accountId, captor.getValue().accountId());
+        assertEquals(searchRequest, captor.getValue().searchRequest());
     }
 
     @Test
-    void transferMoney_shouldBuildCommandAndDelegateToMoneyTransferCommandHandler() {
+    void transferMoney_shouldBuildCommandAndReturnMappedResponse() {
+        // --- ARRANGE ---
         String accountId = "789";
-        var moneyTransferRequest = new MoneyTransferRequest();
-        var expectedResponse = new MoneyTransferResponse();
+        var request = new MoneyTransferRequest();
+        var expected = MoneyTransferApiResponse.builder()
+                .moneyTransferId("TX-1")
+                .status("EXECUTED")
+                .build();
 
-        ArgumentCaptor<MoneyTransferCommandHandler.Command> commandCaptor = ArgumentCaptor.forClass(MoneyTransferCommandHandler.Command.class);
+        when(moneyTransferCommandHandler.handle(any(MoneyTransferCommandHandler.Command.class))).thenReturn(expected);
 
-        when(moneyTransferCommandHandler.handle(any(MoneyTransferCommandHandler.Command.class))).thenReturn(expectedResponse);
+        var result = gbsBankingApiFacade.transferMoney(accountId, request);
 
-        MoneyTransferResponse result = fabrickApiFacade.transferMoney(accountId, moneyTransferRequest);
+        assertNotNull(result);
+        assertEquals(expected, result);
 
-        assertEquals(expectedResponse, result);
-
-        verify(moneyTransferCommandHandler).handle(commandCaptor.capture());
-
-        MoneyTransferCommandHandler.Command capturedCommand = commandCaptor.getValue();
-        assertEquals(accountId, capturedCommand.accountId());
-        assertEquals(moneyTransferRequest, capturedCommand.moneyTransferRequest());
-        assertNotNull(capturedCommand.timeZone());
+        ArgumentCaptor<MoneyTransferCommandHandler.Command> captor = ArgumentCaptor.forClass(MoneyTransferCommandHandler.Command.class);
+        verify(moneyTransferCommandHandler).handle(captor.capture());
+        assertEquals(accountId, captor.getValue().accountId());
+        assertEquals(request, captor.getValue().moneyTransferRequest());
+        assertNotNull(captor.getValue().timeZone());
     }
 }

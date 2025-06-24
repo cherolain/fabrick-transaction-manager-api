@@ -4,14 +4,15 @@ import com.fabrick.test.transaction.manager.api.client.GbsBankingClient;
 import com.fabrick.test.transaction.manager.api.client.dto.request.transactions.TransactionSearchRequest;
 import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
 import com.fabrick.test.transaction.manager.api.client.dto.response.transactions.TransactionListResponse;
+import com.fabrick.test.transaction.manager.api.dto.transactions.TransactionListApiResponse;
+import com.fabrick.test.transaction.manager.api.mapper.TransactionMapper;
 import com.fabrick.test.transaction.manager.api.service.template.RequestHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TransactionsQueryHandler extends RequestHandler<TransactionsQueryHandler.Query, TransactionListResponse, TransactionListResponse> {
-
+public class TransactionsQueryHandler extends RequestHandler<TransactionsQueryHandler.Query, TransactionListResponse, TransactionListApiResponse> {
 
     /**
      * A nested record to group input parameters (accountId and search criteria)
@@ -21,6 +22,7 @@ public class TransactionsQueryHandler extends RequestHandler<TransactionsQueryHa
     }
 
     private final GbsBankingClient client;
+    private final TransactionMapper transactionMapper;
 
 
     @Override
@@ -30,7 +32,7 @@ public class TransactionsQueryHandler extends RequestHandler<TransactionsQueryHa
 
 
     @Override
-    protected TransactionListResponse mapToResponse(TransactionListResponse payload) {
-        return payload;
+    protected TransactionListApiResponse mapToResponse(TransactionListResponse payload) {
+        return transactionMapper.toTransactionApiResponse(payload);
     }
 }

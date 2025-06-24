@@ -3,16 +3,18 @@ package com.fabrick.test.transaction.manager.api.service.handler;
 import com.fabrick.test.transaction.manager.api.client.GbsBankingClient;
 import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.MoneyTransferRequest;
 import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
-import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferResponse;
+import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferGbsResponse;
+import com.fabrick.test.transaction.manager.api.mapper.MoneyTransferMapper;
+import com.fabrick.test.transaction.manager.api.dto.moneytransfer.MoneyTransferApiResponse;
 import com.fabrick.test.transaction.manager.api.service.template.RequestHandler;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class MoneyTransferCommandHandler extends RequestHandler<MoneyTransferCommandHandler.Command, MoneyTransferResponse, MoneyTransferResponse> {
+public class MoneyTransferCommandHandler extends RequestHandler<MoneyTransferCommandHandler.Command, MoneyTransferGbsResponse, MoneyTransferApiResponse> {
 
+    private final MoneyTransferMapper moneyTransferMapper;
     /**
      * A nested record acting as a Data Transfer Object (DTO)
      * for this specific operation. Being declared 'public' and 'static' (implicitly for records),
@@ -36,7 +38,7 @@ public class MoneyTransferCommandHandler extends RequestHandler<MoneyTransferCom
      * @return The full response from the Fabrick API, including the envelope.
      */
     @Override
-    protected GbsBankingResponse<MoneyTransferResponse> performAction(Command command) {
+    protected GbsBankingResponse<MoneyTransferGbsResponse> performAction(Command command) {
         return client.createMoneyTransfer(
                 command.accountId(),
                 command.moneyTransferRequest(),
@@ -51,7 +53,8 @@ public class MoneyTransferCommandHandler extends RequestHandler<MoneyTransferCom
      * @return The final response formatted for the service client.
      */
     @Override
-    protected MoneyTransferResponse mapToResponse(MoneyTransferResponse payload) {
-        return payload;
+    protected MoneyTransferApiResponse mapToResponse(MoneyTransferGbsResponse payload) {
+       return moneyTransferMapper.toMoneyTransferApiResponse(payload);
     }
+
 }

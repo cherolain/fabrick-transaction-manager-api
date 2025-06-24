@@ -2,10 +2,10 @@ package com.fabrick.test.transaction.manager.api.client;
 
 import com.fabrick.test.transaction.manager.api.configuration.GbsBankingConfiguration;
 import com.fabrick.test.transaction.manager.api.client.dto.request.transactions.TransactionSearchRequest;
-import com.fabrick.test.transaction.manager.api.client.dto.response.balance.Balance;
+import com.fabrick.test.transaction.manager.api.client.dto.response.balance.BalanceResponse;
 import com.fabrick.test.transaction.manager.api.client.dto.request.moneytransfer.MoneyTransferRequest;
 import com.fabrick.test.transaction.manager.api.client.dto.response.GbsBankingResponse;
-import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferResponse;
+import com.fabrick.test.transaction.manager.api.client.dto.response.moneytransfer.MoneyTransferGbsResponse;
 import com.fabrick.test.transaction.manager.api.client.dto.response.transactions.TransactionListResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
@@ -28,10 +28,10 @@ public interface GbsBankingClient {
      * Retrieves the balance of a specified account.
      *
      * @param accountId The unique identifier of the account for which the balance is requested.
-     * @return A {@link GbsBankingResponse} containing the {@link Balance} details of the specified account.
+     * @return A {@link GbsBankingResponse} containing the {@link BalanceResponse} details of the specified account.
      */
     @RequestMapping(method = RequestMethod.GET, value = BALANCE_ENDPOINT)
-    GbsBankingResponse<Balance> retrieveAccountBalance(@PathVariable String accountId);
+    GbsBankingResponse<BalanceResponse> retrieveAccountBalance(@PathVariable String accountId);
 
 
     /**
@@ -39,10 +39,10 @@ public interface GbsBankingClient {
      *
      * @param accountId The unique identifier of the account from which the money transfer is initiated.
      * @param moneyTransferResponseRequest The request object containing the details of the money transfer to be created.
-     * @return A {@link GbsBankingResponse} containing the {@link MoneyTransferResponse} with the details of the created money transfer.
+     * @return A {@link GbsBankingResponse} containing the {@link MoneyTransferGbsResponse} with the details of the created money transfer.
      */
     @RequestMapping(method = RequestMethod.POST, value = MONEY_TRANSFER_ENDPOINT)
-    GbsBankingResponse<MoneyTransferResponse> createMoneyTransfer(
+    GbsBankingResponse<MoneyTransferGbsResponse> createMoneyTransfer(
             @PathVariable String accountId,
             @RequestBody MoneyTransferRequest moneyTransferResponseRequest,
             @RequestHeader("X-Time-Zone") String timeZoneHeader
